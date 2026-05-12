@@ -1,0 +1,306 @@
+/* Custom Variables */
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #64748b;
+    --dark-color: #0f172a;
+    --light-bg: #f8fafc;
+    --gradient-1: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+}
+
+html, body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--light-bg);
+    color: var(--dark-color);
+    overflow-x: hidden !important; /* Paksa kunci layar ke samping */
+    width: 100%; /* Pastikan lebar mentok 100% */
+    margin: 0;
+    padding: 0;
+}
+
+/* Typography Enhancements & Utilities */
+.fw-extrabold { font-weight: 800; }
+.tracking-wider { letter-spacing: 0.05em; }
+
+.text-gradient {
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.transition-all {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Navbar Solid Base */
+.navbar {
+    padding: 0.8rem 0;
+    transition: all 0.3s ease;
+}
+.brand-icon-wrapper {
+    background: var(--gradient-1);
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+}
+.nav-link {
+    transition: color 0.2s ease;
+}
+.nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Buttons */
+.btn-modern {
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-modern:hover {
+    transform: translateY(-2px);
+}
+.shadow-primary {
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+.shadow-success {
+    box-shadow: 0 10px 20px rgba(22, 163, 74, 0.2);
+}
+
+/* Hero Section */
+.hero-wrapper {
+    padding-top: 90px; /* Kurangi dari 120px */
+    padding-bottom: 50px; 
+    min-height: auto; /* Ganti 100vh jadi auto agar tidak ada gap raksasa ke bawah */
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05) 0%, transparent 40%);
+}
+
+/* Decor Blobs */
+.blob-shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.5;
+}
+.blob-1 {
+    top: -10%; left: -10%;
+    width: 500px; height: 500px;
+    background: rgba(37, 99, 235, 0.15);
+}
+.blob-2 {
+    bottom: 10%; right: -5%;
+    width: 400px; height: 400px;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+}
+
+.icon-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* Floating Animation */
+.floating-card {
+    animation: floating 6s ease-in-out infinite;
+}
+.floating-card.delay-1 {
+    animation-delay: 2s;
+}
+
+@keyframes floating {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0); }
+}
+
+/* Feature & Section Spacing */
+.section-padding {
+    padding-top: 70px; /* Kurangi dari 100px */
+    padding-bottom: 70px;
+}
+.divider-glow {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent);
+    box-shadow: 0 1px 10px rgba(37, 99, 235, 0.2);
+}
+.feature-box {
+    border: 1px solid transparent;
+}
+.feature-box:hover {
+    background: white !important;
+    border-color: rgba(37, 99, 235, 0.1);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 30px rgba(0,0,0,0.03);
+}
+.feature-icon {
+    width: 75px; height: 75px;
+}
+.feature-icon i {
+    font-size: 2rem;
+}
+
+/* Footer */
+.footer-links a {
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.footer-links a:hover {
+    color: white;
+}
+
+/* =========================================================
+   OPTIMASI RESPONSIVE (TABLET & MOBILE)
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+    .navbar {
+        padding: 0.8rem 0;
+    }
+    .navbar-brand .brand-text {
+        font-size: 1.25rem !important;
+    }
+    .brand-icon-wrapper {
+        width: 32px; height: 32px;
+    }
+    .brand-icon-wrapper i {
+        font-size: 1.1rem !important;
+    }
+    
+    /* Tombol Hamburger: Hapus margin negatif, bikin pas di ujung */
+    .navbar-toggler {
+        padding: 0;
+        border: none;
+        margin: 0; 
+    }
+    .navbar-toggler:focus {
+        box-shadow: none; /* Hilangkan kotak biru bawaan saat diklik */
+    }
+    .navbar-toggler i {
+        font-size: 2rem !important;
+    }
+    
+    /* Menu Dropdown: Hapus padding kiri-kanan agar sejajar dengan logo */
+    #navbarNav {
+        background: #ffffff;
+        border-top: 1px solid #f1f5f9;
+        margin-top: 0.8rem;
+        padding: 1rem 0; /* Kiri-kanan 0 supaya tidak mekar/offside */
+    }
+    
+    .nav-item {
+        border-bottom: 1px solid #f8fafc;
+    }
+    .nav-item:last-child {
+        border-bottom: none;
+    }
+    
+    /* Link: Sejajarkan lurus ke pinggir */
+    .nav-link {
+        padding: 0.8rem 0 !important; 
+    }
+    
+    /* Tombol: Lurus penuh sesuai kotak */
+    .navbar-nav .btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+/* Khusus Mobile Kecil (di bawah 768px) - Menghentikan Efek Nge-zoom */
+@media (max-width: 767.98px) {
+    /* Spacing & Hero Fixes */
+    .section-padding {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+    .hero-wrapper {
+        padding-top: 100px;
+        padding-bottom: 40px;
+        min-height: auto;
+    }
+    h1.hero-title {
+        font-size: 2.2rem !important;
+        line-height: 1.2;
+    }
+    h2.display-5 {
+        font-size: 1.6rem !important;
+    }
+    p.lead {
+        font-size: 0.95rem !important;
+    }
+    .hero-wrapper .btn-lg {
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+    }
+
+    /* Card Fixes */
+    .glass-card {
+        padding: 1.2rem !important;
+    }
+    .icon-circle {
+        width: 60px; height: 60px;
+        margin-bottom: 15px !important;
+    }
+    .icon-circle i {
+        font-size: 1.5rem !important;
+    }
+    .glass-card h4 {
+        font-size: 1.2rem;
+    }
+    .glass-card p {
+        font-size: 0.85rem;
+        margin-bottom: 15px !important;
+    }
+
+    /* Feature Box Fixes */
+    .mobile-app-card .feature-icon {
+        width: 50px !important; height: 50px !important;
+    }
+    .mobile-app-card .feature-icon i {
+        font-size: 1.4rem !important;
+    }
+    .mobile-app-card h5 {
+        font-size: 1.05rem;
+    }
+    .mobile-app-card p {
+        font-size: 0.8rem;
+    }
+
+    /* Footer Fixes */
+    .footer-modern {
+        padding-top: 2rem !important;
+        padding-bottom: 1rem !important;
+    }
+    .footer-modern h5 {
+        font-size: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem !important;
+    }
+    .footer-links li {
+        font-size: 0.85rem;
+        margin-bottom: 0.3rem;
+    }
+    .footer-modern p.text-white-50 {
+        font-size: 0.85rem;
+    }
+    .footer-modern .brand-icon-wrapper {
+        width: 30px; height: 30px;
+    }
+    .footer-modern .brand-icon-wrapper i {
+        font-size: 1rem !important;
+    }
+}
