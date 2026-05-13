@@ -23,11 +23,8 @@
 
                         {{-- Mobile Image --}}
                         <div class="home-mobile-visual">
-                            <img
-                                src="{{ asset('assets/images/baju.png') }}"
-                                alt="Triowash Laundry Service"
-                                class="home-hero-image"
-                            >
+                            <img src="{{ asset('assets/images/baju.png') }}" alt="Triowash Laundry Service"
+                                class="home-hero-image">
                         </div>
 
                         <h1 class="home-hero-title">
@@ -36,7 +33,8 @@
                         </h1>
 
                         <p class="home-hero-description">
-                            Antar jemput gratis untuk wilayah Banjarmasin. Cuci bersih, wangi, dan rapi tanpa perlu keluar rumah.
+                            Antar jemput gratis untuk wilayah Banjarmasin. Cuci bersih, wangi, dan rapi tanpa perlu keluar
+                            rumah.
                             Sistem bayar di akhir yang aman dan transparan.
                         </p>
 
@@ -79,11 +77,8 @@
                     <div class="home-visual">
                         <div class="home-visual-glow"></div>
 
-                        <img
-                            src="{{ asset('assets/images/baju.png') }}"
-                            alt="Triowash Laundry Service"
-                            class="home-hero-image"
-                        >
+                        <img src="{{ asset('assets/images/baju.png') }}" alt="Triowash Laundry Service"
+                            class="home-hero-image">
 
                         <div class="home-floating-card">
                             <div class="home-floating-icon">
@@ -102,71 +97,65 @@
     </section>
 
     {{-- Layanan --}}
+    {{-- Layanan --}}
     <section id="layanan" class="section-padding home-services">
         <div class="container">
-            <div class="section-heading text-center" data-aos="fade-up">
-                <span class="section-eyebrow">
-                    <i class="bi bi-basket2"></i>
-                    Layanan Triowash
-                </span>
-
-                <h2>
-                    Pilih layanan laundry
-                    <span>sesuai kebutuhanmu.</span>
-                </h2>
-
-                <p>
-                    Mulai dari cuci komplit, cuci kering, sampai setrika saja. Semua dibuat praktis, rapi, dan transparan.
-                </p>
-            </div>
-
-            <div class="row g-4 mt-4">
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
-                    <div class="home-card">
-                        <div class="home-card-icon">
+            <div class="home-services-preview">
+                <div class="home-services-list" data-aos="fade-right" data-aos-duration="900">
+                    <div class="home-service-mini-card">
+                        <div class="home-service-mini-icon">
                             <i class="bi bi-basket3"></i>
                         </div>
 
-                        <h5>Cuci Komplit</h5>
-                        <p>Cuci, kering, setrika, dan lipat rapi untuk pakaian harian Anda.</p>
-
-                        <a href="/pesan" class="home-card-link">
-                            Pesan layanan
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
+                        <div>
+                            <h5>Cuci Komplit</h5>
+                            <p>Cuci, kering, setrika, dan lipat rapi.</p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="home-card">
-                        <div class="home-card-icon">
+                    <div class="home-service-mini-card">
+                        <div class="home-service-mini-icon">
                             <i class="bi bi-wind"></i>
                         </div>
 
-                        <h5>Cuci Kering</h5>
-                        <p>Cocok untuk Anda yang ingin pakaian bersih dan kering tanpa setrika.</p>
-
-                        <a href="/pesan" class="home-card-link">
-                            Pesan layanan
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
+                        <div>
+                            <h5>Cuci Kering</h5>
+                            <p>Pakaian bersih dan kering tanpa setrika.</p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="col-md-12 col-lg-4" data-aos="fade-up" data-aos-delay="300">
-                    <div class="home-card home-card-featured">
-                        <div class="home-card-icon">
+                    <div class="home-service-mini-card">
+                        <div class="home-service-mini-icon">
                             <i class="bi bi-lightning-charge"></i>
                         </div>
 
-                        <h5>Setrika Saja</h5>
-                        <p>Untuk pakaian bersih yang butuh dirapikan agar siap dipakai lagi.</p>
-
-                        <a href="/pesan" class="home-card-link">
-                            Pesan layanan
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
+                        <div>
+                            <h5>Setrika Saja</h5>
+                            <p>Pakaian dirapikan agar siap dipakai.</p>
+                        </div>
                     </div>
+                </div>
+
+                <div class="home-services-content" data-aos="fade-left" data-aos-duration="900">
+                    <span class="section-eyebrow">
+                        <i class="bi bi-basket2"></i>
+                        Layanan Triowash
+                    </span>
+
+                    <h2>
+                        Pilih layanan laundry
+                        <span>sesuai kebutuhanmu.</span>
+                    </h2>
+
+                    <p>
+                        Kami menyediakan layanan utama yang simpel dan praktis. Untuk detail pilihan layanan,
+                        berat cucian, dan proses pemesanan, pelanggan bisa langsung masuk ke halaman pesan.
+                    </p>
+
+                    <a href="/pesan" class="btn btn-primary btn-modern shadow-primary home-services-button">
+                        <i class="bi bi-bag-plus"></i>
+                        Pesan Laundry
+                    </a>
                 </div>
             </div>
         </div>

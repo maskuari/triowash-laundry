@@ -59,3 +59,27 @@ function closeMobileNavbar() {
         navbarToggler.click();
     }
 }
+
+// AI chat button
+function initAiChatButton() {
+    const aiChatButton = document.getElementById('aiChatButton');
+
+    if (!aiChatButton) {
+        return;
+    }
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 80) {
+            aiChatButton.classList.add('is-scrolled');
+            return;
+        }
+
+        aiChatButton.classList.remove('is-scrolled');
+    });
+
+    aiChatButton.addEventListener('click', () => {
+        console.log('AI Customer Service dibuka');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initAiChatButton);
