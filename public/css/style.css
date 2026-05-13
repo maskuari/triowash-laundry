@@ -93,11 +93,31 @@ body {
 }
 
 /* Hero */
+/* Hero */
+/* Hero */
 .hero-wrapper {
+    position: relative;
     min-height: auto;
     padding-top: 90px;
     padding-bottom: 50px;
-    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05) 0%, transparent 40%);
+    overflow: hidden;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(248, 250, 252, 0.58) 0%,
+            rgba(248, 250, 252, 0.72) 42%,
+            rgba(248, 250, 252, 0.92) 72%,
+            rgba(248, 250, 252, 0.98) 100%
+        ),
+        url('/assets/images/laundrybg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.hero-wrapper > .container {
+    position: relative;
+    z-index: 1;
 }
 
 .hero-title {
@@ -105,8 +125,10 @@ body {
 }
 
 .hero-image {
-    border: 8px solid #ffffff;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: none;
+    filter:
+        drop-shadow(0 22px 28px rgba(15, 23, 42, 0.22))
+        drop-shadow(0 8px 12px rgba(37, 99, 235, 0.12));
 }
 
 /* Blob */
@@ -167,8 +189,8 @@ body {
 }
 
 .floating-card-delivery {
-    bottom: 5%;
-    left: 0;
+    bottom: 16%;
+    left: 16%;
     z-index: 2;
     padding: 1rem !important;
 }
