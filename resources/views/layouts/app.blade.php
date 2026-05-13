@@ -10,7 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+        rel="stylesheet"
+    >
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -26,14 +27,24 @@
     <nav class="navbar navbar-expand-lg fixed-top navbar-modern" id="mainNavbar">
         <div class="container">
             <a class="navbar-brand brand-logo" href="/" aria-label="Triowash Laundry">
-                <img src="{{ asset('assets/images/logo.png') }}" alt="Triowash Laundry" class="brand-logo-img"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                <img
+                    src="{{ asset('assets/images/logo.png') }}"
+                    alt="Triowash Laundry"
+                    class="brand-logo-img"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
+                >
                 <span class="brand-logo-fallback">triowash</span>
             </a>
 
-            <button class="navbar-toggler navbar-toggler-modern" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-                aria-label="Buka menu navigasi">
+            <button
+                class="navbar-toggler navbar-toggler-modern"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Buka menu navigasi"
+            >
                 <i class="bi bi-list"></i>
             </button>
 
@@ -89,7 +100,12 @@
     </nav>
 
     {{-- AI Chat Button --}}
-    <button type="button" class="ai-chat-button" id="aiChatButton" aria-label="Buka AI Customer Service">
+    <button
+        type="button"
+        class="ai-chat-button"
+        id="aiChatButton"
+        aria-label="Buka AI Customer Service"
+    >
         <span class="ai-chat-icon">
             <i class="bi bi-chat-dots-fill"></i>
         </span>
@@ -112,15 +128,17 @@
                 <div class="row g-4 align-items-start">
                     <div class="col-lg-5 col-md-6" data-aos="fade-up" data-aos-delay="100">
                         <a class="footer-brand" href="/" aria-label="Triowash Laundry">
-                            <img src="{{ asset('assets/images/logo.png') }}" alt="Triowash Laundry"
+                            <img
+                                src="{{ asset('assets/images/logo.png') }}"
+                                alt="Triowash Laundry"
                                 class="footer-logo-img"
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
+                            >
                             <span class="footer-logo-fallback">triowash</span>
                         </a>
 
                         <p class="footer-description mt-3">
-                            Solusi laundry antar jemput yang praktis, modern, dan transparan untuk kebutuhan harian
-                            Anda.
+                            Solusi laundry antar jemput yang praktis, modern, dan transparan untuk kebutuhan harian Anda.
                         </p>
                     </div>
 

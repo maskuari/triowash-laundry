@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initAOS();
     initSmoothScroll();
+    initAiChatButton();
 });
 
 // AOS
@@ -78,8 +79,6 @@ function initAiChatButton() {
     });
 
     aiChatButton.addEventListener('click', () => {
-        console.log('AI Customer Service dibuka');
+        window.location.href = '/cs-ai';
     });
 }
-
-document.addEventListener('DOMContentLoaded', initAiChatButton);
