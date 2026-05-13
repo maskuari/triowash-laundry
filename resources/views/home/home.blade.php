@@ -2,41 +2,45 @@
 
 @section('title', 'Layanan Antar Jemput Praktis')
 
+@section('styles')
+    <link href="{{ asset('css/home.css') }}" rel="stylesheet">
+@endsection
+
 @section('content')
     {{-- Hero --}}
-    <section class="hero-wrapper">
-        <div class="hero-orb hero-orb-1"></div>
-        <div class="hero-orb hero-orb-2"></div>
+    <section class="home-hero">
+        <div class="home-hero-orb home-hero-orb-1"></div>
+        <div class="home-hero-orb home-hero-orb-2"></div>
 
         <div class="container position-relative z-index-1">
-            <div class="row align-items-center hero-row">
+            <div class="row align-items-center home-hero-row">
                 <div class="col-lg-6" data-aos="fade-right" data-aos-duration="900">
-                    <div class="hero-content">
-                        <div class="hero-badge">
+                    <div class="home-hero-content">
+                        <div class="home-hero-badge">
                             <i class="bi bi-stars"></i>
                             Promo Member Baru: Diskon 10%
                         </div>
 
                         {{-- Mobile Image --}}
-                        <div class="hero-mobile-visual">
+                        <div class="home-mobile-visual">
                             <img
                                 src="{{ asset('assets/images/baju.png') }}"
                                 alt="Triowash Laundry Service"
-                                class="img-fluid hero-image"
+                                class="home-hero-image"
                             >
                         </div>
 
-                        <h1 class="hero-title">
-                            <span class="hero-title-main">Triowash Laundry</span>
-                            <span class="hero-title-highlight">Layanan Praktis.</span>
+                        <h1 class="home-hero-title">
+                            <span>Triowash Laundry</span>
+                            <strong>Layanan Praktis.</strong>
                         </h1>
 
-                        <p class="hero-description">
+                        <p class="home-hero-description">
                             Antar jemput gratis untuk wilayah Banjarmasin. Cuci bersih, wangi, dan rapi tanpa perlu keluar rumah.
                             Sistem bayar di akhir yang aman dan transparan.
                         </p>
 
-                        <div class="hero-actions">
+                        <div class="home-hero-actions">
                             <a href="/pesan" class="btn btn-primary btn-hero shadow-primary">
                                 <i class="bi bi-bag-heart"></i>
                                 Pesan Sekarang
@@ -48,21 +52,21 @@
                             </a>
                         </div>
 
-                        <div class="hero-stats">
-                            <div class="hero-stat-card">
-                                <i class="bi bi-truck hero-stat-icon"></i>
+                        <div class="home-stats">
+                            <div class="home-stat-card">
+                                <i class="bi bi-truck home-stat-icon"></i>
                                 <strong>Gratis</strong>
                                 <span>Antar Jemput</span>
                             </div>
 
-                            <div class="hero-stat-card">
-                                <i class="bi bi-grid-1x2 hero-stat-icon hero-stat-icon-blue"></i>
+                            <div class="home-stat-card">
+                                <i class="bi bi-grid-1x2 home-stat-icon home-stat-icon-blue"></i>
                                 <strong>3+</strong>
                                 <span>Pilihan Layanan</span>
                             </div>
 
-                            <div class="hero-stat-card">
-                                <i class="bi bi-lightning-charge hero-stat-icon hero-stat-icon-purple"></i>
+                            <div class="home-stat-card">
+                                <i class="bi bi-lightning-charge home-stat-icon home-stat-icon-purple"></i>
                                 <strong>Fast</strong>
                                 <span>Proses Cepat</span>
                             </div>
@@ -72,17 +76,17 @@
 
                 {{-- Desktop Image --}}
                 <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
-                    <div class="hero-visual">
-                        <div class="hero-visual-glow"></div>
+                    <div class="home-visual">
+                        <div class="home-visual-glow"></div>
 
                         <img
                             src="{{ asset('assets/images/baju.png') }}"
                             alt="Triowash Laundry Service"
-                            class="img-fluid hero-image"
+                            class="home-hero-image"
                         >
 
-                        <div class="floating-card floating-card-quality">
-                            <div class="floating-icon floating-icon-blue">
+                        <div class="home-floating-card">
+                            <div class="home-floating-icon">
                                 <i class="bi bi-droplet-half"></i>
                             </div>
 
@@ -98,7 +102,7 @@
     </section>
 
     {{-- Layanan --}}
-    <section id="layanan" class="section-padding services-section">
+    <section id="layanan" class="section-padding home-services">
         <div class="container">
             <div class="section-heading text-center" data-aos="fade-up">
                 <span class="section-eyebrow">
@@ -118,15 +122,15 @@
 
             <div class="row g-4 mt-4">
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
-                    <div class="service-card">
-                        <div class="service-icon">
+                    <div class="home-card">
+                        <div class="home-card-icon">
                             <i class="bi bi-basket3"></i>
                         </div>
 
                         <h5>Cuci Komplit</h5>
                         <p>Cuci, kering, setrika, dan lipat rapi untuk pakaian harian Anda.</p>
 
-                        <a href="/pesan" class="service-link">
+                        <a href="/pesan" class="home-card-link">
                             Pesan layanan
                             <i class="bi bi-arrow-right"></i>
                         </a>
@@ -134,15 +138,15 @@
                 </div>
 
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="service-card">
-                        <div class="service-icon">
+                    <div class="home-card">
+                        <div class="home-card-icon">
                             <i class="bi bi-wind"></i>
                         </div>
 
                         <h5>Cuci Kering</h5>
                         <p>Cocok untuk Anda yang ingin pakaian bersih dan kering tanpa setrika.</p>
 
-                        <a href="/pesan" class="service-link">
+                        <a href="/pesan" class="home-card-link">
                             Pesan layanan
                             <i class="bi bi-arrow-right"></i>
                         </a>
@@ -150,15 +154,15 @@
                 </div>
 
                 <div class="col-md-12 col-lg-4" data-aos="fade-up" data-aos-delay="300">
-                    <div class="service-card service-card-featured">
-                        <div class="service-icon">
+                    <div class="home-card home-card-featured">
+                        <div class="home-card-icon">
                             <i class="bi bi-lightning-charge"></i>
                         </div>
 
                         <h5>Setrika Saja</h5>
                         <p>Untuk pakaian bersih yang butuh dirapikan agar siap dipakai lagi.</p>
 
-                        <a href="/pesan" class="service-link">
+                        <a href="/pesan" class="home-card-link">
                             Pesan layanan
                             <i class="bi bi-arrow-right"></i>
                         </a>
@@ -169,7 +173,7 @@
     </section>
 
     {{-- Keunggulan --}}
-    <section id="keunggulan" class="section-padding advantages-section">
+    <section id="keunggulan" class="section-padding home-advantages">
         <div class="container">
             <div class="section-heading text-center" data-aos="fade-up">
                 <span class="section-eyebrow">
@@ -189,8 +193,8 @@
 
             <div class="row g-4 mt-4">
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
-                    <div class="feature-box">
-                        <div class="feature-icon">
+                    <div class="home-card">
+                        <div class="home-card-icon">
                             <i class="bi bi-truck"></i>
                         </div>
 
@@ -200,8 +204,8 @@
                 </div>
 
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="feature-box">
-                        <div class="feature-icon">
+                    <div class="home-card">
+                        <div class="home-card-icon">
                             <i class="bi bi-wallet2"></i>
                         </div>
 
@@ -211,8 +215,8 @@
                 </div>
 
                 <div class="col-md-12 col-lg-4" data-aos="fade-up" data-aos-delay="300">
-                    <div class="feature-box">
-                        <div class="feature-icon">
+                    <div class="home-card">
+                        <div class="home-card-icon">
                             <i class="bi bi-stars"></i>
                         </div>
 

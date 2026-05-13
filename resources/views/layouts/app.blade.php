@@ -15,6 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 
     @yield('styles')
@@ -34,7 +35,7 @@
             </a>
 
             <button
-                class="navbar-toggler navbar-toggler-modern mobile-menu-toggler"
+                class="navbar-toggler navbar-toggler-modern"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#navbarNav"
@@ -102,7 +103,7 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="footer-modern text-white">
+    <footer class="footer-modern">
         <div class="container">
             <div class="footer-panel">
                 <div class="row g-4 align-items-start">
