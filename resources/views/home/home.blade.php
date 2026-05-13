@@ -4,61 +4,164 @@
 
 @section('content')
     {{-- Hero --}}
-    <section class="hero-wrapper position-relative d-flex align-items-center">
-        <div class="blob-shape blob-1"></div>
-        <div class="blob-shape blob-2"></div>
+    <section class="hero-wrapper">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
 
         <div class="container position-relative z-index-1">
-            <div class="row align-items-center pt-4 pb-4 g-5">
-                <div class="col-lg-6 text-center text-lg-start" data-aos="fade-right" data-aos-duration="1000">
-                    <div class="badge bg-primary-subtle text-primary rounded-pill px-4 py-2 mb-3 fw-semibold border border-primary-subtle shadow-sm">
-                        <i class="bi bi-tag-fill text-warning me-1"></i>
-                        Promo Member Baru: Diskon 10%
-                    </div>
+            <div class="row align-items-center hero-row">
+                <div class="col-lg-6" data-aos="fade-right" data-aos-duration="900">
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <i class="bi bi-stars"></i>
+                            Promo Member Baru: Diskon 10%
+                        </div>
 
-                    <h1 class="display-4 fw-extrabold text-dark mb-3 hero-title">
-                        Triowash Laundry<br>
-                        <span class="text-gradient">Layanan Praktis.</span>
-                    </h1>
+                        {{-- Mobile Image --}}
+                        <div class="hero-mobile-visual">
+                            <img
+                                src="{{ asset('assets/images/baju.png') }}"
+                                alt="Triowash Laundry Service"
+                                class="img-fluid hero-image"
+                            >
+                        </div>
 
-                    <p class="lead text-secondary mb-5 fw-normal pe-lg-5">
-                        Antar Jemput Gratis untuk wilayah Banjarmasin. Cuci bersih, wangi, dan rapi tanpa perlu keluar rumah.
-                        Sistem bayar di akhir yang aman dan terpercaya.
-                    </p>
+                        <h1 class="hero-title">
+                            <span class="hero-title-main">Triowash Laundry</span>
+                            <span class="hero-title-highlight">Layanan Praktis.</span>
+                        </h1>
 
-                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
-                        <a href="/pesan" class="btn btn-primary btn-lg btn-modern px-5 py-3 shadow-primary d-flex align-items-center justify-content-center">
-                            <i class="bi bi-basket2-fill me-2 fs-5"></i>
-                            PESAN SEKARANG
-                        </a>
+                        <p class="hero-description">
+                            Antar jemput gratis untuk wilayah Banjarmasin. Cuci bersih, wangi, dan rapi tanpa perlu keluar rumah.
+                            Sistem bayar di akhir yang aman dan transparan.
+                        </p>
 
-                        <a href="/periksa-pesanan" class="btn btn-outline-success btn-lg btn-modern px-5 py-3 bg-white d-flex align-items-center justify-content-center">
-                            <i class="bi bi-search me-2 fs-5"></i>
-                            PERIKSA PESANAN
-                        </a>
+                        <div class="hero-actions">
+                            <a href="/pesan" class="btn btn-primary btn-hero shadow-primary">
+                                <i class="bi bi-bag-heart"></i>
+                                Pesan Sekarang
+                            </a>
+
+                            <a href="/periksa-pesanan" class="btn btn-light btn-hero btn-hero-secondary">
+                                <i class="bi bi-search"></i>
+                                Periksa Pesanan
+                            </a>
+                        </div>
+
+                        <div class="hero-stats">
+                            <div class="hero-stat-card">
+                                <i class="bi bi-truck hero-stat-icon"></i>
+                                <strong>Gratis</strong>
+                                <span>Antar Jemput</span>
+                            </div>
+
+                            <div class="hero-stat-card">
+                                <i class="bi bi-grid-1x2 hero-stat-icon hero-stat-icon-blue"></i>
+                                <strong>3+</strong>
+                                <span>Pilihan Layanan</span>
+                            </div>
+
+                            <div class="hero-stat-card">
+                                <i class="bi bi-lightning-charge hero-stat-icon hero-stat-icon-purple"></i>
+                                <strong>Fast</strong>
+                                <span>Proses Cepat</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-                    <div class="position-relative p-3 text-center">
-                        <div class="card glass-card position-absolute border-0 floating-card floating-card-delivery">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="icon-circle icon-circle-sm bg-success-subtle text-success d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-truck fs-3"></i>
-                                </div>
-
-                                <div class="text-start">
-                                    <h6 class="mb-0 fw-bold text-dark">Gratis Ongkir!</h6>
-                                    <small class="text-muted">Antar Jemput</small>
-                                </div>
-                            </div>
-                        </div>
+                {{-- Desktop Image --}}
+                <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
+                    <div class="hero-visual">
+                        <div class="hero-visual-glow"></div>
 
                         <img
                             src="{{ asset('assets/images/baju.png') }}"
                             alt="Triowash Laundry Service"
-                            class="img-fluid rounded-5 position-relative z-index-1 hero-image"
+                            class="img-fluid hero-image"
                         >
+
+                        <div class="floating-card floating-card-quality">
+                            <div class="floating-icon floating-icon-blue">
+                                <i class="bi bi-droplet-half"></i>
+                            </div>
+
+                            <div>
+                                <h6>Bersih & Wangi</h6>
+                                <span>Siap dipakai</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- Layanan --}}
+    <section id="layanan" class="section-padding services-section">
+        <div class="container">
+            <div class="section-heading text-center" data-aos="fade-up">
+                <span class="section-eyebrow">
+                    <i class="bi bi-basket2"></i>
+                    Layanan Triowash
+                </span>
+
+                <h2>
+                    Pilih layanan laundry
+                    <span>sesuai kebutuhanmu.</span>
+                </h2>
+
+                <p>
+                    Mulai dari cuci komplit, cuci kering, sampai setrika saja. Semua dibuat praktis, rapi, dan transparan.
+                </p>
+            </div>
+
+            <div class="row g-4 mt-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-basket3"></i>
+                        </div>
+
+                        <h5>Cuci Komplit</h5>
+                        <p>Cuci, kering, setrika, dan lipat rapi untuk pakaian harian Anda.</p>
+
+                        <a href="/pesan" class="service-link">
+                            Pesan layanan
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-wind"></i>
+                        </div>
+
+                        <h5>Cuci Kering</h5>
+                        <p>Cocok untuk Anda yang ingin pakaian bersih dan kering tanpa setrika.</p>
+
+                        <a href="/pesan" class="service-link">
+                            Pesan layanan
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-12 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-card service-card-featured">
+                        <div class="service-icon">
+                            <i class="bi bi-lightning-charge"></i>
+                        </div>
+
+                        <h5>Setrika Saja</h5>
+                        <p>Untuk pakaian bersih yang butuh dirapikan agar siap dipakai lagi.</p>
+
+                        <a href="/pesan" class="service-link">
+                            Pesan layanan
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -66,84 +169,55 @@
     </section>
 
     {{-- Keunggulan --}}
-    <section id="keunggulan" class="section-padding bg-white position-relative">
-        <div class="position-absolute top-0 start-50 translate-middle-x w-100 divider-glow"></div>
-
+    <section id="keunggulan" class="section-padding advantages-section">
         <div class="container">
-            <div class="text-center mb-5" data-aos="fade-up">
-                <span class="badge bg-primary-subtle text-primary rounded-pill px-4 py-2 mb-3 fw-bold tracking-wider text-uppercase border border-primary-subtle shadow-sm">
-                    <i class="bi bi-patch-check-fill me-1"></i>
+            <div class="section-heading text-center" data-aos="fade-up">
+                <span class="section-eyebrow">
+                    <i class="bi bi-patch-check"></i>
                     Kenapa Memilih Kami
                 </span>
 
-                <h2 class="fw-extrabold display-5 mt-2 mb-3 text-dark">
-                    Layanan Bintang Lima, <br>
-                    <span class="text-gradient">Harga Mahasiswa.</span>
+                <h2>
+                    Laundry modern,
+                    <span>tanpa ribet.</span>
                 </h2>
 
-                <p class="text-secondary mx-auto lead section-description">
-                    Kami mengerti kebutuhan Anda. Kualitas pencucian premium dengan pelayanan maksimal, namun tetap pas di kantong.
+                <p>
+                    Kami membuat proses laundry lebih nyaman, jelas, dan mudah dipantau dari awal sampai selesai.
                 </p>
             </div>
 
-            <div class="row g-3 mt-2">
-                <div class="col-12 col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
-                    <div class="feature-box p-3 p-md-4 rounded-4 bg-light d-flex flex-row flex-md-column align-items-center text-start text-md-center h-100 transition-all mobile-app-card">
-                        <div class="feature-icon bg-white text-primary rounded-circle shadow-sm flex-shrink-0 me-3 me-md-0 mb-md-3 d-flex align-items-center justify-content-center">
-                            <i class="bi bi-person-slash"></i>
-                        </div>
-
-                        <div>
-                            <h5 class="fw-bold mb-1 mb-md-2">Tanpa Akun</h5>
-                            <p class="text-muted small mb-0 lh-sm">
-                                Nggak perlu repot bikin password. Cukup verifikasi pakai Nama dan No HP kamu.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
-                    <div class="feature-box p-3 p-md-4 rounded-4 bg-light d-flex flex-row flex-md-column align-items-center text-start text-md-center h-100 transition-all mobile-app-card">
-                        <div class="feature-icon bg-white text-primary rounded-circle shadow-sm flex-shrink-0 me-3 me-md-0 mb-md-3 d-flex align-items-center justify-content-center">
+            <div class="row g-4 mt-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-box">
+                        <div class="feature-icon">
                             <i class="bi bi-truck"></i>
                         </div>
 
-                        <div>
-                            <h5 class="fw-bold mb-1 mb-md-2">Antar Jemput</h5>
-                            <p class="text-muted small mb-0 lh-sm">
-                                Kamu rebahan aja di kos, kurir kami yang akan ambil dan antar pakaianmu.
-                            </p>
-                        </div>
+                        <h5>Antar Jemput</h5>
+                        <p>Kamu cukup pesan dari rumah atau kos, kurir kami yang ambil dan antar pakaianmu.</p>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
-                    <div class="feature-box p-3 p-md-4 rounded-4 bg-light d-flex flex-row flex-md-column align-items-center text-start text-md-center h-100 transition-all mobile-app-card">
-                        <div class="feature-icon bg-white text-primary rounded-circle shadow-sm flex-shrink-0 me-3 me-md-0 mb-md-3 d-flex align-items-center justify-content-center">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-box">
+                        <div class="feature-icon">
                             <i class="bi bi-wallet2"></i>
                         </div>
 
-                        <div>
-                            <h5 class="fw-bold mb-1 mb-md-2">Bayar Nanti</h5>
-                            <p class="text-muted small mb-0 lh-sm">
-                                Pakaian ditimbang transparan di toko, baru tagihan muncul untuk dibayar.
-                            </p>
-                        </div>
+                        <h5>Bayar Nanti</h5>
+                        <p>Pakaian ditimbang transparan di toko, lalu tagihan muncul setelah proses dihitung.</p>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
-                    <div class="feature-box p-3 p-md-4 rounded-4 bg-light d-flex flex-row flex-md-column align-items-center text-start text-md-center h-100 transition-all mobile-app-card">
-                        <div class="feature-icon bg-white text-primary rounded-circle shadow-sm flex-shrink-0 me-3 me-md-0 mb-md-3 d-flex align-items-center justify-content-center">
+                <div class="col-md-12 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-box">
+                        <div class="feature-icon">
                             <i class="bi bi-stars"></i>
                         </div>
 
-                        <div>
-                            <h5 class="fw-bold mb-1 mb-md-2">Pilihan Wangi</h5>
-                            <p class="text-muted small mb-0 lh-sm">
-                                Fleksibel pilih parfum kesukaanmu. Wangi Bunga, Sport, atau Original.
-                            </p>
-                        </div>
+                        <h5>Pilihan Wangi</h5>
+                        <p>Fleksibel pilih parfum favoritmu, dari wangi bunga, sport, sampai original.</p>
                     </div>
                 </div>
             </div>

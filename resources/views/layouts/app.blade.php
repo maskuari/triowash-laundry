@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
@@ -21,17 +21,20 @@
 </head>
 <body>
     {{-- Header --}}
-    <nav class="navbar navbar-expand-lg fixed-top bg-white border-bottom shadow-sm" id="mainNavbar">
+    <nav class="navbar navbar-expand-lg fixed-top navbar-modern" id="mainNavbar">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="/" aria-label="Triowash Laundry">
-                <div class="brand-icon-wrapper me-2">
-                    <i class="bi bi-droplet-half text-white fs-5"></i>
-                </div>
-                <span class="fw-bold fs-4 text-dark brand-text">Triowash</span>
+            <a class="navbar-brand brand-logo" href="/" aria-label="Triowash Laundry">
+                <img
+                    src="{{ asset('assets/images/logo.png') }}"
+                    alt="Triowash Laundry"
+                    class="brand-logo-img"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
+                >
+                <span class="brand-logo-fallback">triowash</span>
             </a>
 
             <button
-                class="navbar-toggler border-0 shadow-none"
+                class="navbar-toggler navbar-toggler-modern mobile-menu-toggler"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#navbarNav"
@@ -39,29 +42,29 @@
                 aria-expanded="false"
                 aria-label="Buka menu navigasi"
             >
-                <i class="bi bi-list fs-1 text-dark"></i>
+                <i class="bi bi-list"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center fw-medium gap-lg-3 py-3 py-lg-0">
+                <ul class="navbar-nav nav-modern ms-auto align-items-lg-center">
                     <li class="nav-item">
-                        <a class="nav-link text-dark px-0 px-lg-2" href="/#layanan">Layanan</a>
+                        <a class="nav-link" href="/#layanan">Layanan</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link text-dark px-0 px-lg-2" href="/#keunggulan">Keunggulan</a>
+                        <a class="nav-link" href="/#keunggulan">Keunggulan</a>
                     </li>
 
-                    <li class="nav-item mt-3 mt-lg-0 ms-lg-3">
-                        <a class="btn btn-outline-primary w-100 btn-modern px-4" href="/pesan">
-                            <i class="bi bi-cart-plus me-1"></i>
+                    <li class="nav-item nav-cta ms-lg-3">
+                        <a class="btn btn-outline-primary btn-modern" href="/pesan">
+                            <i class="bi bi-bag-plus"></i>
                             Pesan Sekarang
                         </a>
                     </li>
 
-                    <li class="nav-item mt-2 mt-lg-0">
-                        <a class="btn btn-primary w-100 btn-modern px-4 shadow-primary" href="/periksa-pesanan">
-                            <i class="bi bi-search me-1"></i>
+                    <li class="nav-item nav-cta">
+                        <a class="btn btn-primary btn-modern shadow-primary" href="/periksa-pesanan">
+                            <i class="bi bi-search"></i>
                             Periksa Pesanan
                         </a>
                     </li>
@@ -70,68 +73,86 @@
         </div>
     </nav>
 
+    {{-- Mobile Bottom Nav --}}
+    <nav class="mobile-bottom-nav" aria-label="Navigasi mobile">
+        <a href="/" class="mobile-bottom-link active">
+            <i class="bi bi-house-door"></i>
+            <span>Beranda</span>
+        </a>
+
+        <a href="/#layanan" class="mobile-bottom-link">
+            <i class="bi bi-grid"></i>
+            <span>Layanan</span>
+        </a>
+
+        <a href="/pesan" class="mobile-bottom-link mobile-bottom-main">
+            <i class="bi bi-bag-plus"></i>
+            <span>Pesan</span>
+        </a>
+
+        <a href="/periksa-pesanan" class="mobile-bottom-link">
+            <i class="bi bi-search"></i>
+            <span>Cek</span>
+        </a>
+    </nav>
+
     {{-- Content --}}
     <main>
         @yield('content')
     </main>
 
     {{-- Footer --}}
-    <footer class="footer-modern bg-dark text-white pt-5 pb-3 mt-5">
+    <footer class="footer-modern text-white">
         <div class="container">
-            <div class="row g-4 mb-4">
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="brand-icon-wrapper me-2 bg-white">
-                            <i class="bi bi-droplet-half text-primary fs-4"></i>
-                        </div>
-                        <span class="fw-bold fs-4">Triowash</span>
+            <div class="footer-panel">
+                <div class="row g-4 align-items-start">
+                    <div class="col-lg-5 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                        <a class="footer-brand" href="/" aria-label="Triowash Laundry">
+                            <img
+                                src="{{ asset('assets/images/logo.png') }}"
+                                alt="Triowash Laundry"
+                                class="footer-logo-img"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
+                            >
+                            <span class="footer-logo-fallback">triowash</span>
+                        </a>
+
+                        <p class="footer-description mt-3">
+                            Solusi laundry antar jemput yang praktis, modern, dan transparan untuk kebutuhan harian Anda.
+                        </p>
                     </div>
 
-                    <p class="text-white-50">
-                        Solusi laundry praktis, cepat, dan transparan untuk kebutuhan harian Anda.
-                        Tinggal pesan, kami jemput!
-                    </p>
+                    <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <h5 class="footer-title">Menu</h5>
+                        <ul class="list-unstyled footer-links">
+                            <li><a href="/">Beranda</a></li>
+                            <li><a href="/pesan">Pesan Laundry</a></li>
+                            <li><a href="/periksa-pesanan">Cek Status</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <h5 class="footer-title">Layanan</h5>
+                        <ul class="list-unstyled footer-links">
+                            <li>Cuci Komplit</li>
+                            <li>Cuci Kering</li>
+                            <li>Setrika Saja</li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                        <h5 class="footer-title">Kontak</h5>
+                        <ul class="list-unstyled footer-links footer-contact">
+                            <li><i class="bi bi-whatsapp"></i> +62 812-3456-7890</li>
+                            <li><i class="bi bi-geo-alt"></i> Banjarmasin, Kalimantan Selatan</li>
+                            <li><i class="bi bi-instagram"></i> @triowash_laundry</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <h5 class="fw-bold mb-3">Menu</h5>
-                    <ul class="list-unstyled footer-links">
-                        <li><a href="/">Beranda</a></li>
-                        <li><a href="/pesan">Pesan Laundry</a></li>
-                        <li><a href="/periksa-pesanan">Cek Status</a></li>
-                    </ul>
+                <div class="footer-bottom">
+                    <small>&copy; {{ date('Y') }} Triowash Laundry. All rights reserved.</small>
                 </div>
-
-                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <h5 class="fw-bold mb-3">Layanan Kami</h5>
-                    <ul class="list-unstyled footer-links text-white-50">
-                        <li>Cuci Komplit (Setrika + Lipat)</li>
-                        <li>Cuci Kering (Lipat Saja)</li>
-                        <li>Setrika Saja</li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                    <h5 class="fw-bold mb-3">Kontak</h5>
-                    <ul class="list-unstyled footer-links text-white-50">
-                        <li>
-                            <i class="bi bi-whatsapp me-2"></i>
-                            +62 812-3456-7890
-                        </li>
-                        <li>
-                            <i class="bi bi-geo-alt me-2"></i>
-                            Banjarmasin, Kalimantan Selatan
-                        </li>
-                        <li>
-                            <i class="bi bi-instagram me-2"></i>
-                            @triowash_laundry
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-top border-secondary pt-3 text-center text-white-50">
-                <small>&copy; {{ date('Y') }} Triowash Laundry. All rights reserved.</small>
             </div>
         </div>
     </footer>
