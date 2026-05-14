@@ -15,3 +15,15 @@ Route::post('/cs-ai/chat', [AiCustomerServiceController::class, 'chat'])
 
 // Pesan Laundry Page
 Route::view('/pesan', 'order.order')->name('order');
+
+// Admin Dashboard
+Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
+
+// Tracking Pesanan
+Route::view('/periksa-pesanan', 'tracking.index')->name('tracking.index');
+
+// Pembayaran
+// Pembayaran
+Route::view('/pembayaran', 'payment.index')->name('payment.index');
+Route::view('/pembayaran/sukses', 'payment.success')->name('payment.success');
+Route::view('/pembayaran/gagal', 'payment.failed')->name('payment.failed');
