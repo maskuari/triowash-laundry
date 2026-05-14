@@ -12,3 +12,6 @@ Route::view('/cs-ai', 'ai.csai')->name('csai');
 // AI Customer Service Backend
 Route::post('/cs-ai/chat', [AiCustomerServiceController::class, 'chat'])
     ->name('csai.chat');
+
+// Pesan Laundry Page
+Route::view('/pesan', 'order.order')->name('order');
