@@ -11,7 +11,7 @@ class Customer extends Model
         'name',
         'phone',
         'address',
-        'google_maps'
+        'google_maps',
     ];
 
     public function orders(): HasMany

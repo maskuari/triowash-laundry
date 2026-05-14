@@ -11,7 +11,8 @@ class StatusLog extends Model
         'order_id',
         'old_status',
         'new_status',
-        'updated_by'
+        'description',
+        'updated_by',
     ];
 
     public function order(): BelongsTo

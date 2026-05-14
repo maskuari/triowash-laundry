@@ -11,7 +11,12 @@ class OrderItem extends Model
         'order_id',
         'service_id',
         'qty',
-        'subtotal'
+        'subtotal',
+    ];
+
+    protected $casts = [
+        'qty' => 'decimal:2',
+        'subtotal' => 'integer',
     ];
 
     public function order(): BelongsTo
