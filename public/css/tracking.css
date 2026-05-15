@@ -674,3 +674,19 @@
         line-height: 1.35;
     }
 }
+
+.tracking-error {
+    display: block;
+    margin-top: -0.35rem;
+    color: #dc2626;
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.tracking-payment-note {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+}

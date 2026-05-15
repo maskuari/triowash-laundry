@@ -3,6 +3,7 @@
 use App\Http\Controllers\AiCustomerServiceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Route;
 
 // Home
@@ -20,11 +21,12 @@ Route::get('/pesan', [OrderController::class, 'create'])->name('order.create');
 Route::post('/pesan', [OrderController::class, 'store'])->name('order.store');
 Route::get('/pesan/sukses/{order:order_code}', [OrderController::class, 'success'])->name('order.success');
 
+// Tracking Pesanan
+Route::get('/periksa-pesanan', [TrackingController::class, 'index'])->name('tracking.index');
+Route::post('/periksa-pesanan', [TrackingController::class, 'search'])->name('tracking.search');
+
 // Admin Dashboard
 Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
-
-// Tracking Pesanan
-Route::view('/periksa-pesanan', 'tracking.index')->name('tracking.index');
 
 // Pembayaran
 Route::view('/pembayaran', 'payment.index')->name('payment.index');

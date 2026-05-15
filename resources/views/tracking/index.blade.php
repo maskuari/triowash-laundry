@@ -6,6 +6,15 @@
     <link href="{{ asset('css/tracking.css') }}" rel="stylesheet">
 @endsection
 
+@php
+    $currentStatus = $order?->status;
+    $statusOrder = collect($trackingSteps)->pluck('status')->toArray();
+    $currentIndex = $currentStatus ? array_search($currentStatus, $statusOrder, true) : false;
+
+    $mainService = $order?->orderItems?->firstWhere('service.category', 'paket')?->service;
+    $fragrance = $order?->orderItems?->firstWhere('service.category', 'wangi')?->service;
+@endphp
+
 @section('content')
     <section class="tracking-page">
         <div class="tracking-bg tracking-bg-1"></div>
@@ -30,16 +39,40 @@
                         Sistem akan menampilkan status terbaru pesanan laundry kamu.
                     </p>
 
-                    <form class="tracking-form" id="trackingForm">
+                    <form class="tracking-form" id="trackingForm" method="POST" action="{{ route('tracking.search') }}">
+                        @csrf
+
                         <div class="tracking-field">
                             <i class="bi bi-person"></i>
-                            <input type="text" id="customerName" placeholder="Contoh: Budi Santoso" autocomplete="off">
+                            <input
+                                type="text"
+                                name="name"
+                                id="customerName"
+                                placeholder="Contoh: Budi Santoso"
+                                autocomplete="off"
+                                value="{{ old('name') }}"
+                            >
                         </div>
+
+                        @error('name')
+                            <small class="tracking-error">{{ $message }}</small>
+                        @enderror
 
                         <div class="tracking-field">
                             <i class="bi bi-telephone"></i>
-                            <input type="text" id="customerPhone" placeholder="Contoh: 081234567890" autocomplete="off">
+                            <input
+                                type="text"
+                                name="phone"
+                                id="customerPhone"
+                                placeholder="Contoh: 081234567890"
+                                autocomplete="off"
+                                value="{{ old('phone') }}"
+                            >
                         </div>
+
+                        @error('phone')
+                            <small class="tracking-error">{{ $message }}</small>
+                        @enderror
 
                         <button type="submit">
                             <i class="bi bi-search"></i>
@@ -61,143 +94,139 @@
                         </div>
                     </div>
 
-                    <div class="tracking-result" id="trackingResult">
-                        <div class="tracking-order">
-                            <div>
-                                <span>Kode Pesanan</span>
-                                <strong>TWO-001</strong>
-                            </div>
-
-                            <small>Diproses</small>
-                        </div>
-
-                        <div class="tracking-data">
-                            <div>
-                                <span>Nama</span>
-                                <strong>Budi Santoso</strong>
-                            </div>
-
-                            <div>
-                                <span>No. Telepon</span>
-                                <strong>081234567890</strong>
-                            </div>
-
-                            <div>
-                                <span>Layanan</span>
-                                <strong>Cuci Komplit</strong>
-                            </div>
-
-                            <div>
-                                <span>Total Harga</span>
-                                <strong>Rp21.000</strong>
-                            </div>
-                        </div>
-
-                        <div class="tracking-title">
-                            <i class="bi bi-arrow-repeat"></i>
-                            Progress Pesanan
-                        </div>
-
-                        <div class="tracking-timeline">
-                            <div class="tracking-step done">
-                                <i class="bi bi-check-lg"></i>
+                    @if ($order)
+                        <div class="tracking-result" id="trackingResult">
+                            <div class="tracking-order">
                                 <div>
-                                    <strong>Verifikasi</strong>
-                                    <span>Pesanan masuk dan diterima admin.</span>
+                                    <span>Kode Pesanan</span>
+                                    <strong>{{ $order->order_code }}</strong>
+                                </div>
+
+                                <small>{{ $order->status_label }}</small>
+                            </div>
+
+                            <div class="tracking-data">
+                                <div>
+                                    <span>Nama</span>
+                                    <strong>{{ $order->customer->name }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>No. Telepon</span>
+                                    <strong>{{ $order->customer->phone }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Layanan</span>
+                                    <strong>{{ $mainService?->service_name ?? '-' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Wangi</span>
+                                    <strong>{{ $fragrance?->service_name ?? '-' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Antar Jemput</span>
+                                    <strong>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Berat</span>
+                                    <strong>{{ $order->weight ? $order->weight . ' Kg' : 'Belum ditimbang' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Total Harga</span>
+                                    <strong>
+                                        @if ($order->total_price > 0)
+                                            Rp{{ number_format($order->total_price, 0, ',', '.') }}
+                                        @else
+                                            Belum dihitung
+                                        @endif
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Pembayaran</span>
+                                    <strong>{{ $order->payment_status_label }}</strong>
                                 </div>
                             </div>
 
-                            <div class="tracking-step done">
-                                <i class="bi bi-check-lg"></i>
-                                <div>
-                                    <strong>Dijemput</strong>
-                                    <span>Kurir menjemput cucian pelanggan.</span>
-                                </div>
+                            <div class="tracking-title">
+                                <i class="bi bi-arrow-repeat"></i>
+                                Progress Pesanan
                             </div>
 
-                            <div class="tracking-step current">
-                                <i class="bi bi-droplet-half"></i>
-                                <div>
-                                    <strong>Diproses</strong>
-                                    <span>Pakaian sedang dicuci atau dikerjakan.</span>
-                                </div>
+                            <div class="tracking-timeline">
+                                @foreach ($trackingSteps as $index => $step)
+                                    @php
+                                        $isDone = $currentIndex !== false && $index < $currentIndex;
+                                        $isCurrent = $currentStatus === $step['status'];
+
+                                        $stepClass = '';
+                                        if ($isDone) {
+                                            $stepClass = 'done';
+                                        }
+                                        if ($isCurrent) {
+                                            $stepClass = 'current';
+                                        }
+                                    @endphp
+
+                                    <div class="tracking-step {{ $stepClass }}">
+                                        <i class="bi {{ $isDone ? 'bi-check-lg' : $step['icon'] }}"></i>
+                                        <div>
+                                            <strong>{{ $step['label'] }}</strong>
+                                            <span>{{ $step['description'] }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
 
-                            <div class="tracking-step">
-                                <i class="bi bi-box-seam"></i>
+                            <div class="tracking-payment">
                                 <div>
-                                    <strong>Selesai</strong>
-                                    <span>Pengerjaan selesai.</span>
+                                    <span>Status Pembayaran</span>
+                                    <strong>{{ $order->payment_status_label }}</strong>
                                 </div>
-                            </div>
 
-                            <div class="tracking-step">
-                                <i class="bi bi-truck"></i>
-                                <div>
-                                    <strong>Diantar</strong>
-                                    <span>Pesanan dalam pengantaran.</span>
-                                </div>
-                            </div>
-
-                            <div class="tracking-step">
-                                <i class="bi bi-house-check"></i>
-                                <div>
-                                    <strong>Diterima</strong>
-                                    <span>Pesanan sudah diterima pelanggan.</span>
-                                </div>
+                                @if ($order->payment_status === \App\Models\Order::PAYMENT_UNPAID && $order->total_price > 0)
+                                    <a href="/pembayaran?order={{ $order->order_code }}" class="tracking-pay-link">
+                                        <i class="bi bi-qr-code"></i>
+                                        Bayar
+                                    </a>
+                                @else
+                                    <span class="tracking-payment-note">
+                                        {{ $order->total_price > 0 ? 'Tidak perlu pembayaran.' : 'Menunggu hasil timbang.' }}
+                                    </span>
+                                @endif
                             </div>
                         </div>
-
-                        <div class="tracking-payment">
-                            <div>
-                                <span>Status Pembayaran</span>
-                                <strong>Belum Dibayar</strong>
+                    @elseif ($searched)
+                        <div class="tracking-empty" id="trackingEmpty">
+                            <div class="tracking-empty-icon">
+                                <i class="bi bi-search"></i>
                             </div>
 
-                            <a href="/pembayaran" class="tracking-pay-link">
-                                <i class="bi bi-qr-code"></i>
-                                Bayar
-                            </a>
+                            <h5>Pesanan Tidak Ditemukan</h5>
+                            <p>
+                                Tidak ditemukan pesanan dengan nama dan nomor tersebut.
+                                Pastikan data yang dimasukkan sudah benar.
+                            </p>
                         </div>
-                    </div>
+                    @else
+                        <div class="tracking-empty" id="trackingEmpty">
+                            <div class="tracking-empty-icon">
+                                <i class="bi bi-info-circle"></i>
+                            </div>
 
-                    <div class="tracking-empty d-none" id="trackingEmpty">
-                        <div class="tracking-empty-icon">
-                            <i class="bi bi-search"></i>
+                            <h5>Masukkan Data Pesanan</h5>
+                            <p>
+                                Isi nama dan nomor telepon untuk melihat status pesanan laundry kamu.
+                            </p>
                         </div>
-
-                        <h5>Pesanan Tidak Ditemukan</h5>
-                        <p>
-                            Tidak ditemukan pesanan dengan nama dan nomor tersebut.
-                            Pastikan data yang dimasukkan sudah benar.
-                        </p>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
     </section>
-@endsection
-
-@section('scripts')
-    <script>
-        const trackingForm = document.getElementById('trackingForm');
-        const trackingResult = document.getElementById('trackingResult');
-        const trackingEmpty = document.getElementById('trackingEmpty');
-
-        trackingForm?.addEventListener('submit', function (event) {
-            event.preventDefault();
-
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-
-            if (!name || !phone) {
-                trackingResult.classList.add('d-none');
-                trackingEmpty.classList.remove('d-none');
-                return;
-            }
-
-            trackingEmpty.classList.add('d-none');
-            trackingResult.classList.remove('d-none');
-        });
-    </script>
 @endsection
