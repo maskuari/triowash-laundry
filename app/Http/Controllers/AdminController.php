@@ -18,41 +18,47 @@ class AdminController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('search'));
+        $searchMasuk = trim((string) $request->query('search_masuk'));
+        $searchDiproses = trim((string) $request->query('search_diproses'));
+        $searchSelesai = trim((string) $request->query('search_selesai'));
 
-        $ordersQuery = Order::query()
+        $allOrders = Order::query()
             ->with(['customer', 'orderItems.service', 'pickupOption', 'payment'])
-            ->latest();
+            ->latest()
+            ->get();
 
-        if ($search !== '') {
-            $ordersQuery->where(function ($query) use ($search) {
-                $query->where('order_code', 'like', "%{$search}%")
-                    ->orWhereHas('customer', function ($customerQuery) use ($search) {
-                        $customerQuery
-                            ->where('name', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%");
-                    });
-            });
-        }
+        $incomingOrders = $this->orderSectionQuery(
+            statuses: [Order::STATUS_MENUNGGU_VERIFIKASI],
+            search: $searchMasuk
+        )->get();
 
-        $orders = $ordersQuery->get();
+        $processedOrders = $this->orderSectionQuery(
+            statuses: [
+                Order::STATUS_DIJEMPUT,
+                Order::STATUS_DIPROSES,
+                Order::STATUS_MENUNGGU_PEMBAYARAN,
+                Order::STATUS_DIANTAR,
+            ],
+            search: $searchDiproses
+        )->get();
 
-        $incomingOrders = $orders->where('status', Order::STATUS_MENUNGGU_VERIFIKASI);
+        $finishedOrders = $this->orderSectionQuery(
+            statuses: [
+                Order::STATUS_SELESAI,
+                Order::STATUS_SELESAI_DITERIMA,
+            ],
+            search: $searchSelesai
+        )->get();
 
-        $approvedOrders = $orders->where('status', Order::STATUS_DIJEMPUT);
+        $approvedOrders = $processedOrders->where('status', Order::STATUS_DIJEMPUT);
 
-        $activeOrders = $orders->whereIn('status', [
+        $activeOrders = $processedOrders->whereIn('status', [
             Order::STATUS_DIPROSES,
             Order::STATUS_MENUNGGU_PEMBAYARAN,
             Order::STATUS_DIANTAR,
         ]);
 
-        $finishedOrders = $orders->whereIn('status', [
-            Order::STATUS_SELESAI,
-            Order::STATUS_SELESAI_DITERIMA,
-        ]);
-
-        $cancelledOrders = $orders->where('status', Order::STATUS_DIBATALKAN);
+        $cancelledOrders = $allOrders->where('status', Order::STATUS_DIBATALKAN);
 
         $todayRevenue = Payment::query()
             ->where('status', Payment::STATUS_PAID)
@@ -69,25 +75,33 @@ class AdminController extends Controller
             ->orderBy('id')
             ->get();
 
-        $paymentOrders = $orders
+        $paymentOrders = $allOrders
             ->where('total_price', '>', 0)
             ->where('payment_status', Order::PAYMENT_UNPAID);
 
         $stats = [
-            'incoming_orders' => $incomingOrders->count(),
-            'approved_orders' => $approvedOrders->count(),
-            'pickup_orders' => $approvedOrders->count(),
-            'processing_orders' => $activeOrders->count(),
-            'finished_orders' => $finishedOrders->count(),
+            'incoming_orders' => $allOrders->where('status', Order::STATUS_MENUNGGU_VERIFIKASI)->count(),
+            'approved_orders' => $allOrders->where('status', Order::STATUS_DIJEMPUT)->count(),
+            'pickup_orders' => $allOrders->where('status', Order::STATUS_DIJEMPUT)->count(),
+            'processing_orders' => $allOrders->whereIn('status', [
+                Order::STATUS_DIPROSES,
+                Order::STATUS_MENUNGGU_PEMBAYARAN,
+                Order::STATUS_DIANTAR,
+            ])->count(),
+            'finished_orders' => $allOrders->whereIn('status', [
+                Order::STATUS_SELESAI,
+                Order::STATUS_SELESAI_DITERIMA,
+            ])->count(),
             'cancelled_orders' => $cancelledOrders->count(),
             'today_revenue' => $todayRevenue,
-            'paid_orders' => $orders->where('payment_status', Order::PAYMENT_PAID)->count(),
-            'unpaid_orders' => $orders->where('payment_status', Order::PAYMENT_UNPAID)->count(),
+            'paid_orders' => $allOrders->where('payment_status', Order::PAYMENT_PAID)->count(),
+            'unpaid_orders' => $allOrders->where('payment_status', Order::PAYMENT_UNPAID)->count(),
         ];
 
         return view('admin.dashboard', [
-            'orders' => $orders,
+            'orders' => $allOrders,
             'incomingOrders' => $incomingOrders,
+            'processedOrders' => $processedOrders,
             'approvedOrders' => $approvedOrders,
             'activeOrders' => $activeOrders,
             'finishedOrders' => $finishedOrders,
@@ -96,8 +110,48 @@ class AdminController extends Controller
             'services' => $services,
             'pickupOptions' => $pickupOptions,
             'stats' => $stats,
-            'search' => $search,
+            'searchMasuk' => $searchMasuk,
+            'searchDiproses' => $searchDiproses,
+            'searchSelesai' => $searchSelesai,
         ]);
+    }
+
+    private function orderSectionQuery(array $statuses, string $search)
+    {
+        $query = Order::query()
+            ->with(['customer', 'orderItems.service', 'pickupOption', 'payment'])
+            ->whereIn('status', $statuses)
+            ->latest();
+
+        if ($search !== '') {
+            $query->where(function ($orderQuery) use ($search) {
+                $orderQuery
+                    ->where('order_code', 'like', "%{$search}%")
+                    ->orWhere('pickup_option_name', 'like', "%{$search}%")
+                    ->orWhere('payment_status', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                        $customerQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('address', 'like', "%{$search}%")
+                            ->orWhere('city', 'like', "%{$search}%")
+                            ->orWhere('district', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('orderItems.service', function ($serviceQuery) use ($search) {
+                        $serviceQuery
+                            ->where('service_name', 'like', "%{$search}%")
+                            ->orWhere('category', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('pickupOption', function ($pickupQuery) use ($search) {
+                        $pickupQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query;
     }
 
     public function showOrder(Order $order): View

@@ -86,28 +86,6 @@
                     <h1>Kelola Operasional Triowash</h1>
                     <p>Pesanan dipisah berdasarkan status supaya data tidak menumpuk dalam satu daftar.</p>
                 </div>
-
-                <form method="GET" action="{{ route('admin.dashboard') }}" class="admin-topbar-actions">
-                    <div class="admin-search">
-                        <i class="bi bi-search"></i>
-                        <input
-                            type="text"
-                            name="search"
-                            placeholder="Cari kode pesanan, nama, nomor..."
-                            value="{{ $search ?? '' }}"
-                        >
-                    </div>
-
-                    <button class="admin-btn-primary" type="submit">
-                        Cari
-                    </button>
-
-                    @if (!empty($search))
-                        <a href="{{ route('admin.dashboard') }}" class="admin-btn-secondary text-decoration-none">
-                            Reset
-                        </a>
-                    @endif
-                </form>
             </header>
 
             <section id="dashboard" class="admin-summary-grid">
@@ -157,287 +135,378 @@
             </section>
 
             <section class="admin-content-list">
-                {{-- Pesanan Masuk --}}
                 <div id="masuk" class="admin-panel admin-panel-full">
-                    <div class="admin-panel-header">
+                    <div class="admin-panel-header admin-panel-header-search">
                         <div>
                             <span>Incoming</span>
                             <h2>Pesanan Masuk</h2>
                         </div>
+
+                        <form method="GET" action="{{ route('admin.dashboard') }}" class="admin-section-search-form">
+                            <input type="hidden" name="search_diproses" value="{{ $searchDiproses ?? '' }}">
+                            <input type="hidden" name="search_selesai" value="{{ $searchSelesai ?? '' }}">
+
+                            <div class="admin-section-search">
+                                <i class="bi bi-search"></i>
+                                <input
+                                    type="text"
+                                    name="search_masuk"
+                                    placeholder="Cari kode, nama, nomor, layanan..."
+                                    value="{{ $searchMasuk ?? '' }}"
+                                >
+                            </div>
+
+                            <button type="submit" class="admin-btn-primary">Cari</button>
+
+                            @if (!empty($searchMasuk))
+                                <a
+                                    href="{{ route('admin.dashboard', [
+                                        'search_diproses' => $searchDiproses ?? '',
+                                        'search_selesai' => $searchSelesai ?? '',
+                                    ]) }}#masuk"
+                                    class="admin-btn-secondary text-decoration-none"
+                                >
+                                    Reset
+                                </a>
+                            @endif
+                        </form>
                     </div>
 
-                    <div class="admin-table-wrapper">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Kode</th>
-                                    <th>Pelanggan</th>
-                                    <th>Layanan</th>
-                                    <th>Opsi</th>
-                                    <th>Status</th>
-                                    <th>Bayar</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @forelse ($incomingOrders as $order)
-                                    @php
-                                        $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
-                                        $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
-                                    @endphp
-
+                    <div class="admin-table-scroll">
+                        <div class="admin-table-wrapper">
+                            <table class="admin-table">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <strong>{{ $order->order_code }}</strong>
-                                            <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
-                                        </td>
-
-                                        <td>
-                                            <div class="admin-customer">
-                                                <span>{{ $order->customer->name }}</span>
-                                                <small>{{ $order->customer->phone }}</small>
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            {{ $mainService?->service_name ?? '-' }}
-                                            @if ($fragrance)
-                                                <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
-                                            @endif
-                                        </td>
-
-                                        <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
-
-                                        <td>
-                                            <span class="admin-badge warning">
-                                                {{ $order->status_label }}
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
-                                                {{ $order->payment_status_label }}
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            <div class="admin-table-actions">
-                                                <form method="POST" action="{{ route('admin.orders.approve', $order->order_code) }}">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button class="admin-action success" type="submit">ACC</button>
-                                                </form>
-
-                                                <form method="POST" action="{{ route('admin.orders.reject', $order->order_code) }}">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button
-                                                        class="admin-action danger"
-                                                        type="submit"
-                                                        onclick="return confirm('Tolak pesanan ini? Pesanan akan otomatis terhapus.')"
-                                                    >
-                                                        Tolak
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
+                                        <th>Kode</th>
+                                        <th>Pelanggan</th>
+                                        <th>Layanan</th>
+                                        <th>Opsi</th>
+                                        <th>Status</th>
+                                        <th>Bayar</th>
+                                        <th>Aksi</th>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted fw-bold py-4">
-                                            Tidak ada pesanan masuk.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody>
+                                    @forelse ($incomingOrders as $order)
+                                        @php
+                                            $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
+                                            $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
+                                        @endphp
+
+                                        <tr>
+                                            <td>
+                                                <strong>{{ $order->order_code }}</strong>
+                                                <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
+                                            </td>
+
+                                            <td>
+                                                <div class="admin-customer">
+                                                    <span>{{ $order->customer->name }}</span>
+                                                    <small>{{ $order->customer->phone }}</small>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                {{ $mainService?->service_name ?? '-' }}
+                                                @if ($fragrance)
+                                                    <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
+                                                @endif
+                                            </td>
+
+                                            <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
+
+                                            <td>
+                                                <span class="admin-badge warning">
+                                                    {{ $order->status_label }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
+                                                    {{ $order->payment_status_label }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <div class="admin-table-actions">
+                                                    <form method="POST" action="{{ route('admin.orders.approve', $order->order_code) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="admin-action success" type="submit">ACC</button>
+                                                    </form>
+
+                                                    <form method="POST" action="{{ route('admin.orders.reject', $order->order_code) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button
+                                                            class="admin-action danger"
+                                                            type="submit"
+                                                            onclick="return confirm('Tolak pesanan ini? Pesanan akan otomatis terhapus.')"
+                                                        >
+                                                            Tolak
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted fw-bold py-4">
+                                                Tidak ada pesanan masuk.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
+                    <p class="admin-table-note">Jika data lebih dari 10 baris, tabel bisa discroll.</p>
                 </div>
 
-                {{-- Pesanan Diproses --}}
                 <div id="diproses" class="admin-panel admin-panel-full">
-                    <div class="admin-panel-header">
+                    <div class="admin-panel-header admin-panel-header-search">
                         <div>
                             <span>Process</span>
                             <h2>Pesanan Diproses</h2>
                         </div>
+
+                        <form method="GET" action="{{ route('admin.dashboard') }}" class="admin-section-search-form">
+                            <input type="hidden" name="search_masuk" value="{{ $searchMasuk ?? '' }}">
+                            <input type="hidden" name="search_selesai" value="{{ $searchSelesai ?? '' }}">
+
+                            <div class="admin-section-search">
+                                <i class="bi bi-search"></i>
+                                <input
+                                    type="text"
+                                    name="search_diproses"
+                                    placeholder="Cari kode, nama, nomor, layanan..."
+                                    value="{{ $searchDiproses ?? '' }}"
+                                >
+                            </div>
+
+                            <button type="submit" class="admin-btn-primary">Cari</button>
+
+                            @if (!empty($searchDiproses))
+                                <a
+                                    href="{{ route('admin.dashboard', [
+                                        'search_masuk' => $searchMasuk ?? '',
+                                        'search_selesai' => $searchSelesai ?? '',
+                                    ]) }}#diproses"
+                                    class="admin-btn-secondary text-decoration-none"
+                                >
+                                    Reset
+                                </a>
+                            @endif
+                        </form>
                     </div>
 
-                    <div class="admin-table-wrapper">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Kode</th>
-                                    <th>Pelanggan</th>
-                                    <th>Layanan</th>
-                                    <th>Opsi</th>
-                                    <th>Status</th>
-                                    <th>Bayar</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @php
-                                    $processedOrders = collect($approvedOrders)->merge($activeOrders);
-                                @endphp
-
-                                @forelse ($processedOrders as $order)
-                                    @php
-                                        $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
-                                        $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
-                                    @endphp
-
+                    <div class="admin-table-scroll">
+                        <div class="admin-table-wrapper">
+                            <table class="admin-table">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <strong>{{ $order->order_code }}</strong>
-                                            <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
-                                        </td>
-
-                                        <td>
-                                            <div class="admin-customer">
-                                                <span>{{ $order->customer->name }}</span>
-                                                <small>{{ $order->customer->phone }}</small>
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            {{ $mainService?->service_name ?? '-' }}
-                                            @if ($fragrance)
-                                                <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
-                                            @endif
-                                        </td>
-
-                                        <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
-
-                                        <td>
-                                            <span class="admin-badge process">
-                                                {{ $order->status_label }}
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
-                                                {{ $order->payment_status_label }}
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            <a href="{{ route('admin.orders.show', $order->order_code) }}" class="admin-action primary text-decoration-none">
-                                                Detail
-                                            </a>
-                                        </td>
+                                        <th>Kode</th>
+                                        <th>Pelanggan</th>
+                                        <th>Layanan</th>
+                                        <th>Opsi</th>
+                                        <th>Status</th>
+                                        <th>Bayar</th>
+                                        <th>Aksi</th>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted fw-bold py-4">
-                                            Tidak ada pesanan diproses.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody>
+                                    @forelse ($processedOrders as $order)
+                                        @php
+                                            $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
+                                            $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
+                                        @endphp
+
+                                        <tr>
+                                            <td>
+                                                <strong>{{ $order->order_code }}</strong>
+                                                <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
+                                            </td>
+
+                                            <td>
+                                                <div class="admin-customer">
+                                                    <span>{{ $order->customer->name }}</span>
+                                                    <small>{{ $order->customer->phone }}</small>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                {{ $mainService?->service_name ?? '-' }}
+                                                @if ($fragrance)
+                                                    <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
+                                                @endif
+                                            </td>
+
+                                            <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
+
+                                            <td>
+                                                <span class="admin-badge process">
+                                                    {{ $order->status_label }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
+                                                    {{ $order->payment_status_label }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <a href="{{ route('admin.orders.show', $order->order_code) }}" class="admin-action primary text-decoration-none">
+                                                    Detail
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted fw-bold py-4">
+                                                Tidak ada pesanan diproses.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
+                    <p class="admin-table-note">Jika data lebih dari 10 baris, tabel bisa discroll.</p>
                 </div>
 
-                {{-- Pesanan Selesai --}}
                 <div id="selesai" class="admin-panel admin-panel-full">
-                    <div class="admin-panel-header">
+                    <div class="admin-panel-header admin-panel-header-search">
                         <div>
                             <span>Done</span>
                             <h2>Pesanan Selesai</h2>
                         </div>
+
+                        <form method="GET" action="{{ route('admin.dashboard') }}" class="admin-section-search-form">
+                            <input type="hidden" name="search_masuk" value="{{ $searchMasuk ?? '' }}">
+                            <input type="hidden" name="search_diproses" value="{{ $searchDiproses ?? '' }}">
+
+                            <div class="admin-section-search">
+                                <i class="bi bi-search"></i>
+                                <input
+                                    type="text"
+                                    name="search_selesai"
+                                    placeholder="Cari kode, nama, nomor, layanan..."
+                                    value="{{ $searchSelesai ?? '' }}"
+                                >
+                            </div>
+
+                            <button type="submit" class="admin-btn-primary">Cari</button>
+
+                            @if (!empty($searchSelesai))
+                                <a
+                                    href="{{ route('admin.dashboard', [
+                                        'search_masuk' => $searchMasuk ?? '',
+                                        'search_diproses' => $searchDiproses ?? '',
+                                    ]) }}#selesai"
+                                    class="admin-btn-secondary text-decoration-none"
+                                >
+                                    Reset
+                                </a>
+                            @endif
+                        </form>
                     </div>
 
-                    <div class="admin-table-wrapper">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Kode</th>
-                                    <th>Pelanggan</th>
-                                    <th>Layanan</th>
-                                    <th>Opsi</th>
-                                    <th>Status</th>
-                                    <th>Bayar</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @forelse ($finishedOrders as $order)
-                                    @php
-                                        $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
-                                        $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
-                                    @endphp
-
+                    <div class="admin-table-scroll">
+                        <div class="admin-table-wrapper">
+                            <table class="admin-table">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <strong>{{ $order->order_code }}</strong>
-                                            <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
-                                        </td>
-
-                                        <td>
-                                            <div class="admin-customer">
-                                                <span>{{ $order->customer->name }}</span>
-                                                <small>{{ $order->customer->phone }}</small>
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            {{ $mainService?->service_name ?? '-' }}
-                                            @if ($fragrance)
-                                                <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
-                                            @endif
-                                        </td>
-
-                                        <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
-
-                                        <td>
-                                            <span class="admin-badge done">
-                                                {{ $order->status_label }}
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
-                                                {{ $order->payment_status_label }}
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            <div class="admin-table-actions">
-                                                <a href="{{ route('admin.orders.show', $order->order_code) }}" class="admin-action primary text-decoration-none">
-                                                    Detail
-                                                </a>
-
-                                                <form method="POST" action="{{ route('admin.orders.delete', $order->order_code) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button
-                                                        class="admin-action danger"
-                                                        type="submit"
-                                                        onclick="return confirm('Hapus data pesanan selesai ini?')"
-                                                    >
-                                                        Hapus
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
+                                        <th>Kode</th>
+                                        <th>Pelanggan</th>
+                                        <th>Layanan</th>
+                                        <th>Opsi</th>
+                                        <th>Status</th>
+                                        <th>Bayar</th>
+                                        <th>Aksi</th>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted fw-bold py-4">
-                                            Tidak ada pesanan selesai.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody>
+                                    @forelse ($finishedOrders as $order)
+                                        @php
+                                            $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
+                                            $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
+                                        @endphp
+
+                                        <tr>
+                                            <td>
+                                                <strong>{{ $order->order_code }}</strong>
+                                                <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
+                                            </td>
+
+                                            <td>
+                                                <div class="admin-customer">
+                                                    <span>{{ $order->customer->name }}</span>
+                                                    <small>{{ $order->customer->phone }}</small>
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                {{ $mainService?->service_name ?? '-' }}
+                                                @if ($fragrance)
+                                                    <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
+                                                @endif
+                                            </td>
+
+                                            <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
+
+                                            <td>
+                                                <span class="admin-badge done">
+                                                    {{ $order->status_label }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
+                                                    {{ $order->payment_status_label }}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <div class="admin-table-actions">
+                                                    <a href="{{ route('admin.orders.show', $order->order_code) }}" class="admin-action primary text-decoration-none">
+                                                        Detail
+                                                    </a>
+
+                                                    <form method="POST" action="{{ route('admin.orders.delete', $order->order_code) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button
+                                                            class="admin-action danger"
+                                                            type="submit"
+                                                            onclick="return confirm('Hapus data pesanan selesai ini?')"
+                                                        >
+                                                            Hapus
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted fw-bold py-4">
+                                                Tidak ada pesanan selesai.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
+                    <p class="admin-table-note">Jika data lebih dari 10 baris, tabel bisa discroll.</p>
                 </div>
 
-                {{-- Layanan --}}
                 <div id="layanan" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header">
                         <div>
@@ -496,7 +565,6 @@
                     </div>
                 </div>
 
-                {{-- Pickup --}}
                 <div id="pickup" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header">
                         <div>
