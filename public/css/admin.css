@@ -980,3 +980,64 @@
         grid-column: auto;
     }
 }
+
+.admin-table-actions form {
+    display: inline-flex;
+}
+
+.admin-setting-form select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    outline: 0;
+    background: var(--white);
+    font-weight: 700;
+}
+
+.admin-service-item form button {
+    border: 0;
+    color: #dc2626;
+    background: transparent;
+}
+
+.admin-badge.danger {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
+.admin-content-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.admin-panel-full {
+    width: 100%;
+}
+
+.admin-table-actions form {
+    display: inline-flex;
+}
+
+.admin-setting-form select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    outline: 0;
+    background: var(--white);
+    font-weight: 700;
+}
+
+.admin-service-item form button {
+    border: 0;
+    color: #dc2626;
+    background: transparent;
+}
+
+.admin-badge.danger {
+    color: #b91c1c;
+    background: #fee2e2;
+}

@@ -16,22 +16,43 @@ use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $orders = Order::query()
+        $search = trim((string) $request->query('search'));
+
+        $ordersQuery = Order::query()
             ->with(['customer', 'orderItems.service', 'pickupOption', 'payment'])
-            ->latest()
-            ->get();
+            ->latest();
+
+        if ($search !== '') {
+            $ordersQuery->where(function ($query) use ($search) {
+                $query->where('order_code', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                        $customerQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $orders = $ordersQuery->get();
 
         $incomingOrders = $orders->where('status', Order::STATUS_MENUNGGU_VERIFIKASI);
-        $pickupOrders = $orders->where('status', Order::STATUS_DIJEMPUT);
-        $processingOrders = $orders->whereIn('status', [
-            Order::STATUS_DIJEMPUT,
+
+        $approvedOrders = $orders->where('status', Order::STATUS_DIJEMPUT);
+
+        $activeOrders = $orders->whereIn('status', [
             Order::STATUS_DIPROSES,
             Order::STATUS_MENUNGGU_PEMBAYARAN,
-            Order::STATUS_SELESAI,
             Order::STATUS_DIANTAR,
         ]);
+
+        $finishedOrders = $orders->whereIn('status', [
+            Order::STATUS_SELESAI,
+            Order::STATUS_SELESAI_DITERIMA,
+        ]);
+
+        $cancelledOrders = $orders->where('status', Order::STATUS_DIBATALKAN);
 
         $todayRevenue = Payment::query()
             ->where('status', Payment::STATUS_PAID)
@@ -43,20 +64,22 @@ class AdminController extends Controller
             ->orderBy('price_per_kg')
             ->get();
 
-        $packages = $services->where('category', 'paket');
-        $fragrances = $services->where('category', 'wangi');
-
         $pickupOptions = PickupOption::query()
             ->orderByDesc('is_active')
             ->orderBy('id')
             ->get();
 
-        $paymentOrders = $orders->where('total_price', '>', 0);
+        $paymentOrders = $orders
+            ->where('total_price', '>', 0)
+            ->where('payment_status', Order::PAYMENT_UNPAID);
 
         $stats = [
             'incoming_orders' => $incomingOrders->count(),
-            'pickup_orders' => $pickupOrders->count(),
-            'processing_orders' => $processingOrders->count(),
+            'approved_orders' => $approvedOrders->count(),
+            'pickup_orders' => $approvedOrders->count(),
+            'processing_orders' => $activeOrders->count(),
+            'finished_orders' => $finishedOrders->count(),
+            'cancelled_orders' => $cancelledOrders->count(),
             'today_revenue' => $todayRevenue,
             'paid_orders' => $orders->where('payment_status', Order::PAYMENT_PAID)->count(),
             'unpaid_orders' => $orders->where('payment_status', Order::PAYMENT_UNPAID)->count(),
@@ -65,14 +88,15 @@ class AdminController extends Controller
         return view('admin.dashboard', [
             'orders' => $orders,
             'incomingOrders' => $incomingOrders,
-            'pickupOrders' => $pickupOrders,
-            'processingOrders' => $processingOrders,
+            'approvedOrders' => $approvedOrders,
+            'activeOrders' => $activeOrders,
+            'finishedOrders' => $finishedOrders,
+            'cancelledOrders' => $cancelledOrders,
             'paymentOrders' => $paymentOrders,
-            'packages' => $packages,
-            'fragrances' => $fragrances,
             'services' => $services,
             'pickupOptions' => $pickupOptions,
             'stats' => $stats,
+            'search' => $search,
         ]);
     }
 
@@ -99,18 +123,31 @@ class AdminController extends Controller
             description: 'Pesanan disetujui admin. Kurir akan menjemput pakaian.'
         );
 
-        return back()->with('success', 'Pesanan berhasil di-ACC dan status berubah menjadi dijemput.');
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', 'Pesanan berhasil di-ACC dan pindah ke bagian ACC/Dijemput.');
     }
 
     public function rejectOrder(Order $order): RedirectResponse
     {
-        $this->changeStatus(
-            order: $order,
-            newStatus: Order::STATUS_DIBATALKAN,
-            description: 'Pesanan ditolak atau dibatalkan oleh admin.'
-        );
+        $orderCode = $order->order_code;
 
-        return back()->with('success', 'Pesanan berhasil ditolak/dibatalkan.');
+        $order->delete();
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', "Pesanan {$orderCode} ditolak dan otomatis dihapus.");
+    }
+
+    public function deleteOrder(Order $order): RedirectResponse
+    {
+        $orderCode = $order->order_code;
+
+        $order->delete();
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', "Pesanan {$orderCode} berhasil dihapus.");
     }
 
     public function updateWeight(Request $request, Order $order): RedirectResponse
