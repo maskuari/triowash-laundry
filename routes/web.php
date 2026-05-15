@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AiCustomerServiceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
@@ -26,7 +27,23 @@ Route::get('/periksa-pesanan', [TrackingController::class, 'index'])->name('trac
 Route::post('/periksa-pesanan', [TrackingController::class, 'search'])->name('tracking.search');
 
 // Admin Dashboard
-Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
+Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+Route::get('/admin/pesanan/{order:order_code}', [AdminController::class, 'showOrder'])->name('admin.orders.show');
+Route::patch('/admin/pesanan/{order:order_code}/acc', [AdminController::class, 'approveOrder'])->name('admin.orders.approve');
+Route::patch('/admin/pesanan/{order:order_code}/tolak', [AdminController::class, 'rejectOrder'])->name('admin.orders.reject');
+Route::patch('/admin/pesanan/{order:order_code}/timbang', [AdminController::class, 'updateWeight'])->name('admin.orders.weight');
+Route::patch('/admin/pesanan/{order:order_code}/status', [AdminController::class, 'updateStatus'])->name('admin.orders.status');
+Route::post('/admin/pesanan/{order:order_code}/bayar-tunai', [AdminController::class, 'confirmCashPayment'])->name('admin.orders.cash-payment');
+
+// Admin Layanan & Wangi
+Route::post('/admin/layanan', [AdminController::class, 'storeService'])->name('admin.services.store');
+Route::patch('/admin/layanan/{service}', [AdminController::class, 'updateService'])->name('admin.services.update');
+Route::delete('/admin/layanan/{service}', [AdminController::class, 'deleteService'])->name('admin.services.delete');
+
+// Admin Opsi Antar Jemput
+Route::post('/admin/opsi-antar-jemput', [AdminController::class, 'storePickupOption'])->name('admin.pickup-options.store');
+Route::patch('/admin/opsi-antar-jemput/{pickupOption}', [AdminController::class, 'updatePickupOption'])->name('admin.pickup-options.update');
+Route::delete('/admin/opsi-antar-jemput/{pickupOption}', [AdminController::class, 'deletePickupOption'])->name('admin.pickup-options.delete');
 
 // Pembayaran
 Route::view('/pembayaran', 'payment.index')->name('payment.index');

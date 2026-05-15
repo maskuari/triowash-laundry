@@ -849,3 +849,134 @@
         padding: 1rem;
     }
 }
+
+.admin-table-actions form {
+    display: inline-flex;
+}
+
+.admin-setting-form select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    outline: 0;
+    background: var(--white);
+    font-weight: 700;
+}
+
+.admin-service-item form button {
+    border: 0;
+    color: #dc2626;
+    background: transparent;
+}
+
+.admin-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.admin-detail-grid div,
+.admin-detail-list div {
+    padding: 0.85rem;
+    border-radius: 18px;
+    background: #f8fafc;
+}
+
+.admin-detail-full {
+    grid-column: 1 / -1;
+}
+
+.admin-detail-grid span,
+.admin-detail-list span {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.admin-detail-grid strong,
+.admin-detail-list strong {
+    display: block;
+    color: var(--dark);
+    font-size: 0.92rem;
+    font-weight: 900;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.admin-detail-link {
+    display: inline-flex;
+    color: var(--primary);
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.admin-detail-list {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.admin-action-stack {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.admin-action-stack label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.admin-action-stack select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    outline: 0;
+    background: var(--white);
+    font-weight: 700;
+}
+
+.admin-btn-danger {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    border: 0;
+    border-radius: 16px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    font-weight: 900;
+}
+
+.admin-empty-box {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 18px;
+    color: var(--muted);
+    background: #f8fafc;
+    font-weight: 700;
+}
+
+.admin-empty-box p {
+    margin: 0;
+}
+
+@media (max-width: 767.98px) {
+    .admin-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-detail-full {
+        grid-column: auto;
+    }
+}

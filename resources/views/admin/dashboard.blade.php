@@ -28,7 +28,7 @@
                 <a href="#pesanan" class="admin-menu-link">
                     <i class="bi bi-inbox-fill"></i>
                     <span>Pesanan Masuk</span>
-                    <small>8</small>
+                    <small>{{ $stats['incoming_orders'] ?? 0 }}</small>
                 </a>
 
                 <a href="#timbang" class="admin-menu-link">
@@ -36,24 +36,19 @@
                     <span>Proses Timbang</span>
                 </a>
 
-                <a href="#status" class="admin-menu-link">
-                    <i class="bi bi-arrow-repeat"></i>
-                    <span>Status Pesanan</span>
+                <a href="#pembayaran" class="admin-menu-link">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Pembayaran</span>
                 </a>
 
                 <a href="#layanan" class="admin-menu-link">
                     <i class="bi bi-basket2-fill"></i>
-                    <span>Manajemen Layanan</span>
+                    <span>Layanan/Wangi</span>
                 </a>
 
-                <a href="#laporan" class="admin-menu-link">
-                    <i class="bi bi-bar-chart-fill"></i>
-                    <span>Laporan</span>
-                </a>
-
-                <a href="#setting" class="admin-menu-link">
-                    <i class="bi bi-gear-fill"></i>
-                    <span>Setting Toko</span>
+                <a href="#pickup" class="admin-menu-link">
+                    <i class="bi bi-truck"></i>
+                    <span>Antar Jemput</span>
                 </a>
             </nav>
 
@@ -66,24 +61,38 @@
         </aside>
 
         <main class="admin-main">
+            {{-- Flash Message --}}
+            @if (session('success'))
+                <div class="alert alert-success rounded-4 fw-bold mb-3">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger rounded-4 fw-bold mb-3">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert alert-danger rounded-4 fw-bold mb-3">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             {{-- Topbar --}}
             <header class="admin-topbar">
                 <div>
                     <span class="admin-eyebrow">Dashboard Admin</span>
                     <h1>Selamat datang, Admin Triowash</h1>
-                    <p>Kelola pesanan, status, pembayaran, layanan, dan laporan toko dari satu tempat.</p>
+                    <p>Kelola pesanan, timbang cucian, pembayaran, layanan, dan opsi antar jemput.</p>
                 </div>
 
                 <div class="admin-topbar-actions">
                     <div class="admin-search">
                         <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Cari kode pesanan, nama, nomor...">
+                        <input type="text" placeholder="Cari kode pesanan, nama, nomor..." id="adminSearchInput">
                     </div>
-
-                    <button class="admin-icon-btn">
-                        <i class="bi bi-bell"></i>
-                        <span></span>
-                    </button>
 
                     <div class="admin-profile">
                         <div class="admin-profile-avatar">A</div>
@@ -103,8 +112,8 @@
                     </div>
                     <div>
                         <span>Pesanan Masuk</span>
-                        <strong>18</strong>
-                        <small>+6 hari ini</small>
+                        <strong>{{ $stats['incoming_orders'] ?? 0 }}</strong>
+                        <small>Menunggu ACC</small>
                     </div>
                 </div>
 
@@ -114,7 +123,7 @@
                     </div>
                     <div>
                         <span>Perlu Dijemput</span>
-                        <strong>7</strong>
+                        <strong>{{ $stats['pickup_orders'] ?? 0 }}</strong>
                         <small>Menunggu kurir</small>
                     </div>
                 </div>
@@ -125,7 +134,7 @@
                     </div>
                     <div>
                         <span>Sedang Diproses</span>
-                        <strong>12</strong>
+                        <strong>{{ $stats['processing_orders'] ?? 0 }}</strong>
                         <small>Dalam pengerjaan</small>
                     </div>
                 </div>
@@ -136,30 +145,29 @@
                     </div>
                     <div>
                         <span>Pendapatan Hari Ini</span>
-                        <strong>Rp450K</strong>
-                        <small>15 transaksi</small>
+                        <strong>Rp{{ number_format($stats['today_revenue'] ?? 0, 0, ',', '.') }}</strong>
+                        <small>{{ $stats['paid_orders'] ?? 0 }} pesanan lunas</small>
                     </div>
                 </div>
             </section>
 
-            {{-- Content Grid --}}
             <section class="admin-content-grid">
-                {{-- Pesanan Masuk --}}
+                {{-- Pesanan --}}
                 <div id="pesanan" class="admin-panel admin-panel-large">
                     <div class="admin-panel-header">
                         <div>
                             <span>Order Queue</span>
-                            <h2>Pesanan Masuk</h2>
+                            <h2>Daftar Pesanan</h2>
                         </div>
 
-                        <button class="admin-btn-primary">
+                        <a href="/pesan" class="admin-btn-primary text-decoration-none">
                             <i class="bi bi-plus-lg"></i>
                             Tambah Pesanan
-                        </button>
+                        </a>
                     </div>
 
                     <div class="admin-table-wrapper">
-                        <table class="admin-table">
+                        <table class="admin-table" id="adminOrderTable">
                             <thead>
                                 <tr>
                                     <th>Kode</th>
@@ -167,92 +175,91 @@
                                     <th>Layanan</th>
                                     <th>Opsi</th>
                                     <th>Status</th>
+                                    <th>Bayar</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                <tr>
-                                    <td><strong>TWO-001</strong></td>
-                                    <td>
-                                        <div class="admin-customer">
-                                            <span>Budi Santoso</span>
-                                            <small>081234567890</small>
-                                        </div>
-                                    </td>
-                                    <td>Cuci Komplit</td>
-                                    <td>Dijemput-Antar</td>
-                                    <td><span class="admin-badge warning">Menunggu ACC</span></td>
-                                    <td>
-                                        <div class="admin-table-actions">
-                                            <button class="admin-action success">ACC</button>
-                                            <button class="admin-action danger">Tolak</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @forelse ($orders as $order)
+                                    @php
+                                        $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
+                                        $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
+                                    @endphp
 
-                                <tr>
-                                    <td><strong>TWO-002</strong></td>
-                                    <td>
-                                        <div class="admin-customer">
-                                            <span>Citra Dewi</span>
-                                            <small>087812345678</small>
-                                        </div>
-                                    </td>
-                                    <td>Cuci Kering</td>
-                                    <td>Antar-Ambil Sendiri</td>
-                                    <td><span class="admin-badge info">Dijemput</span></td>
-                                    <td>
-                                        <div class="admin-table-actions">
-                                            <button class="admin-action primary">Detail</button>
-                                            <button class="admin-action dark">Timbang</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $order->order_code }}</strong>
+                                            <small class="d-block text-muted">
+                                                {{ $order->created_at->format('d M Y') }}
+                                            </small>
+                                        </td>
 
-                                <tr>
-                                    <td><strong>TWO-003</strong></td>
-                                    <td>
-                                        <div class="admin-customer">
-                                            <span>Rahmat Hidayat</span>
-                                            <small>082156789012</small>
-                                        </div>
-                                    </td>
-                                    <td>Setrika Saja</td>
-                                    <td>Diantar Saja</td>
-                                    <td><span class="admin-badge process">Diproses</span></td>
-                                    <td>
-                                        <div class="admin-table-actions">
-                                            <button class="admin-action primary">Detail</button>
-                                            <button class="admin-action success">Selesai</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        <td>
+                                            <div class="admin-customer">
+                                                <span>{{ $order->customer->name }}</span>
+                                                <small>{{ $order->customer->phone }}</small>
+                                            </div>
+                                        </td>
 
-                                <tr>
-                                    <td><strong>TWO-004</strong></td>
-                                    <td>
-                                        <div class="admin-customer">
-                                            <span>Nadia Putri</span>
-                                            <small>085678901234</small>
-                                        </div>
-                                    </td>
-                                    <td>Cuci Komplit</td>
-                                    <td>Dijemput-Antar</td>
-                                    <td><span class="admin-badge done">Selesai</span></td>
-                                    <td>
-                                        <div class="admin-table-actions">
-                                            <button class="admin-action primary">Detail</button>
-                                            <button class="admin-action dark">Antar</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        <td>
+                                            {{ $mainService?->service_name ?? '-' }}
+                                            @if ($fragrance)
+                                                <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
+                                            @endif
+                                        </td>
+
+                                        <td>
+                                            {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
+                                        </td>
+
+                                        <td>
+                                            <span class="admin-badge {{ $order->status === 'dibatalkan' ? 'danger' : ($order->status === 'selesai_diterima' ? 'done' : 'process') }}">
+                                                {{ $order->status_label }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
+                                                {{ $order->payment_status_label }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <div class="admin-table-actions">
+                                                @if ($order->status === \App\Models\Order::STATUS_MENUNGGU_VERIFIKASI)
+                                                    <form method="POST" action="{{ route('admin.orders.approve', $order->order_code) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="admin-action success" type="submit">ACC</button>
+                                                    </form>
+
+                                                    <form method="POST" action="{{ route('admin.orders.reject', $order->order_code) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="admin-action danger" type="submit">Tolak</button>
+                                                    </form>
+                                                @endif
+
+                                                <a href="{{ route('admin.orders.show', $order->order_code) }}" class="admin-action primary text-decoration-none">
+                                                    Detail
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted fw-bold py-4">
+                                            Belum ada pesanan.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                {{-- Workflow --}}
+                {{-- Status --}}
                 <div id="status" class="admin-panel">
                     <div class="admin-panel-header">
                         <div>
@@ -268,7 +275,7 @@
                                 <strong>Menunggu Verifikasi</strong>
                                 <span>Pesanan baru masuk</span>
                             </div>
-                            <small>8</small>
+                            <small>{{ $stats['incoming_orders'] ?? 0 }}</small>
                         </div>
 
                         <div class="admin-status-item">
@@ -277,34 +284,25 @@
                                 <strong>Dijemput</strong>
                                 <span>Kurir menjemput pakaian</span>
                             </div>
-                            <small>7</small>
+                            <small>{{ $stats['pickup_orders'] ?? 0 }}</small>
                         </div>
 
                         <div class="admin-status-item">
                             <i class="bi bi-droplet"></i>
                             <div>
-                                <strong>Diproses</strong>
-                                <span>Pakaian sedang dikerjakan</span>
+                                <strong>Aktif Diproses</strong>
+                                <span>Pesanan sedang berjalan</span>
                             </div>
-                            <small>12</small>
+                            <small>{{ $stats['processing_orders'] ?? 0 }}</small>
                         </div>
 
                         <div class="admin-status-item">
-                            <i class="bi bi-check2-circle"></i>
+                            <i class="bi bi-cash-stack"></i>
                             <div>
-                                <strong>Selesai</strong>
-                                <span>Menunggu diantar/diambil</span>
+                                <strong>Belum Dibayar</strong>
+                                <span>Menunggu pembayaran</span>
                             </div>
-                            <small>5</small>
-                        </div>
-
-                        <div class="admin-status-item">
-                            <i class="bi bi-box-seam"></i>
-                            <div>
-                                <strong>Selesai Diterima</strong>
-                                <span>Pesanan diterima pelanggan</span>
-                            </div>
-                            <small>21</small>
+                            <small>{{ $stats['unpaid_orders'] ?? 0 }}</small>
                         </div>
                     </div>
                 </div>
@@ -318,219 +316,229 @@
                         </div>
                     </div>
 
-                    <form class="admin-weight-form">
+                    <form class="admin-weight-form" method="POST" action="#" id="adminWeightForm">
+                        @csrf
+                        @method('PATCH')
+
                         <label>Kode Pesanan</label>
-                        <select>
-                            <option>TWO-001 - Budi Santoso</option>
-                            <option>TWO-002 - Citra Dewi</option>
-                            <option>TWO-003 - Rahmat Hidayat</option>
+                        <select id="weightOrderSelect">
+                            <option value="">Pilih Pesanan</option>
+                            @foreach ($orders as $order)
+                                <option
+                                    value="{{ route('admin.orders.weight', $order->order_code) }}"
+                                    data-total="{{ $order->total_price }}"
+                                >
+                                    {{ $order->order_code }} - {{ $order->customer->name }}
+                                </option>
+                            @endforeach
                         </select>
 
                         <label>Berat Cucian</label>
                         <div class="admin-input-group">
-                            <input type="number" step="0.1" placeholder="Contoh: 3.5">
+                            <input type="number" name="weight" step="0.1" placeholder="Contoh: 3.5">
                             <span>Kg</span>
                         </div>
 
-                        <label>Layanan</label>
-                        <select>
-                            <option>Cuci Komplit - Rp5.000/kg</option>
-                            <option>Cuci Kering - Rp3.000/kg</option>
-                            <option>Setrika Saja - Rp4.000/kg</option>
-                        </select>
-
-                        <label>Wangi</label>
-                        <select>
-                            <option>Wangi Bunga - Rp1.000/kg</option>
-                            <option>Wangi Sport - Rp1.000/kg</option>
-                            <option>Wangi Original - Gratis</option>
-                        </select>
-
-                        <div class="admin-price-preview">
-                            <span>Estimasi Total</span>
-                            <strong>Rp21.000</strong>
-                        </div>
-
-                        <button type="button" class="admin-btn-primary w-100">
+                        <button type="submit" class="admin-btn-primary w-100">
                             Simpan Berat & Hitung Harga
                         </button>
                     </form>
                 </div>
 
                 {{-- Pembayaran --}}
-                <div class="admin-panel">
+                <div id="pembayaran" class="admin-panel">
                     <div class="admin-panel-header">
                         <div>
                             <span>Payment</span>
-                            <h2>Pembayaran</h2>
+                            <h2>Pembayaran Tunai</h2>
                         </div>
                     </div>
 
-                    <div class="admin-payment-list">
-                        <div class="admin-payment-item">
-                            <div>
-                                <strong>TWO-001</strong>
-                                <span>Rp21.000</span>
-                            </div>
-                            <small class="admin-badge warning">Unpaid</small>
+                    <form class="admin-weight-form" method="POST" action="#" id="adminCashForm">
+                        @csrf
+
+                        <label>Pesanan</label>
+                        <select id="cashOrderSelect">
+                            <option value="">Pilih Pesanan</option>
+                            @foreach ($paymentOrders as $order)
+                                <option value="{{ route('admin.orders.cash-payment', $order->order_code) }}">
+                                    {{ $order->order_code }} - Rp{{ number_format($order->total_price, 0, ',', '.') }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <label>Nominal Uang Diterima</label>
+                        <div class="admin-input-group">
+                            <input type="number" name="cash_received" placeholder="Contoh: 25000">
+                            <span>Rp</span>
                         </div>
 
-                        <div class="admin-payment-item">
-                            <div>
-                                <strong>TWO-002</strong>
-                                <span>Rp10.000</span>
-                            </div>
-                            <small class="admin-badge done">Paid</small>
-                        </div>
+                        <button type="submit" class="admin-btn-primary w-100">
+                            Konfirmasi Bayar Tunai
+                        </button>
+                    </form>
 
-                        <div class="admin-payment-item">
-                            <div>
-                                <strong>TWO-003</strong>
-                                <span>Rp17.500</span>
-                            </div>
-                            <small class="admin-badge warning">Unpaid</small>
-                        </div>
-                    </div>
-
-                    <div class="admin-payment-actions">
-                        <button class="admin-action success">Bayar Tunai</button>
-                        <button class="admin-action primary">Generate QRIS</button>
-                    </div>
+                    <small class="d-block mt-3 text-muted fw-bold">
+                        Pembayaran QRIS akan otomatis lunas setelah Midtrans callback/webhook aktif.
+                    </small>
                 </div>
 
-                {{-- Manajemen Layanan --}}
-                <div id="layanan" class="admin-panel">
+                {{-- Layanan / Wangi --}}
+                <div id="layanan" class="admin-panel admin-panel-large">
                     <div class="admin-panel-header">
                         <div>
                             <span>Services</span>
-                            <h2>Manajemen Layanan</h2>
+                            <h2>Kelola Layanan & Wangi</h2>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.services.store') }}" class="admin-setting-form mb-4">
+                        @csrf
+
+                        <div>
+                            <label>Nama Layanan/Wangi</label>
+                            <input type="text" name="service_name" placeholder="Contoh: Cuci Komplit">
                         </div>
 
-                        <button class="admin-icon-btn small">
-                            <i class="bi bi-plus-lg"></i>
+                        <div>
+                            <label>Kategori</label>
+                            <select name="category">
+                                <option value="paket">Paket Layanan</option>
+                                <option value="wangi">Pilihan Wangi</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Harga per Kg</label>
+                            <input type="number" name="price_per_kg" placeholder="Contoh: 5000">
+                        </div>
+
+                        <button type="submit" class="admin-btn-primary">
+                            Tambah
                         </button>
-                    </div>
+                    </form>
 
                     <div class="admin-service-list">
-                        <div class="admin-service-item">
-                            <div class="admin-service-icon">
-                                <i class="bi bi-basket3"></i>
-                            </div>
-                            <div>
-                                <strong>Cuci Komplit</strong>
-                                <span>Rp5.000/kg</span>
-                            </div>
-                            <button><i class="bi bi-pencil"></i></button>
-                        </div>
+                        @foreach ($services as $service)
+                            <div class="admin-service-item">
+                                <div class="admin-service-icon">
+                                    <i class="bi {{ $service->category === 'paket' ? 'bi-basket3' : 'bi-stars' }}"></i>
+                                </div>
 
-                        <div class="admin-service-item">
-                            <div class="admin-service-icon">
-                                <i class="bi bi-wind"></i>
-                            </div>
-                            <div>
-                                <strong>Cuci Kering</strong>
-                                <span>Rp3.000/kg</span>
-                            </div>
-                            <button><i class="bi bi-pencil"></i></button>
-                        </div>
+                                <div>
+                                    <strong>{{ $service->service_name }}</strong>
+                                    <span>{{ ucfirst($service->category) }} • Rp{{ number_format($service->price_per_kg, 0, ',', '.') }}/kg</span>
+                                </div>
 
-                        <div class="admin-service-item">
-                            <div class="admin-service-icon">
-                                <i class="bi bi-lightning"></i>
+                                <form method="POST" action="{{ route('admin.services.delete', $service->id) }}" class="ms-auto">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" onclick="return confirm('Hapus layanan ini?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </div>
-                            <div>
-                                <strong>Setrika Saja</strong>
-                                <span>Rp4.000/kg</span>
-                            </div>
-                            <button><i class="bi bi-pencil"></i></button>
-                        </div>
-
-                        <div class="admin-service-item">
-                            <div class="admin-service-icon">
-                                <i class="bi bi-stars"></i>
-                            </div>
-                            <div>
-                                <strong>Wangi Bunga</strong>
-                                <span>Rp1.000/kg</span>
-                            </div>
-                            <button><i class="bi bi-pencil"></i></button>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
-                {{-- Laporan --}}
-                <div id="laporan" class="admin-panel">
+                {{-- Opsi Antar Jemput --}}
+                <div id="pickup" class="admin-panel admin-panel-large">
                     <div class="admin-panel-header">
                         <div>
-                            <span>Reports</span>
-                            <h2>Laporan Pendapatan</h2>
+                            <span>Pickup Options</span>
+                            <h2>Kelola Opsi Antar Jemput</h2>
                         </div>
                     </div>
 
-                    <div class="admin-report-card">
+                    <form method="POST" action="{{ route('admin.pickup-options.store') }}" class="admin-setting-form mb-4">
+                        @csrf
+
                         <div>
-                            <span>Hari Ini</span>
-                            <strong>Rp450.000</strong>
-                        </div>
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-
-                    <div class="admin-chart-placeholder">
-                        <div style="height: 55%"></div>
-                        <div style="height: 75%"></div>
-                        <div style="height: 42%"></div>
-                        <div style="height: 88%"></div>
-                        <div style="height: 64%"></div>
-                        <div style="height: 95%"></div>
-                        <div style="height: 72%"></div>
-                    </div>
-
-                    <button class="admin-btn-secondary w-100">
-                        Lihat Laporan Lengkap
-                    </button>
-                </div>
-
-                {{-- Setting Toko --}}
-                <div id="setting" class="admin-panel admin-panel-large">
-                    <div class="admin-panel-header">
-                        <div>
-                            <span>Store Settings</span>
-                            <h2>Setting Toko</h2>
-                        </div>
-                    </div>
-
-                    <form class="admin-setting-form">
-                        <div>
-                            <label>Nama Toko</label>
-                            <input type="text" value="Triowash Laundry">
+                            <label>Nama Opsi</label>
+                            <input type="text" name="name" placeholder="Contoh: Dijemput & Diantar">
                         </div>
 
                         <div>
-                            <label>Nomor WhatsApp</label>
-                            <input type="text" value="+62 812-3456-7890">
-                        </div>
-
-                        <div>
-                            <label>Alamat Toko</label>
-                            <input type="text" value="Banjarmasin, Kalimantan Selatan">
-                        </div>
-
-                        <div>
-                            <label>Jam Operasional</label>
-                            <input type="text" value="08.00 - 21.00 WITA">
+                            <label>Kode Opsi</label>
+                            <input type="text" name="code" placeholder="Contoh: dijemput_antar">
                         </div>
 
                         <div class="admin-setting-full">
-                            <label>Catatan Toko</label>
-                            <textarea>Pastikan semua pesanan ditimbang sebelum total harga ditampilkan kepada pelanggan.</textarea>
+                            <label>Deskripsi</label>
+                            <textarea name="description" placeholder="Deskripsi opsi antar jemput"></textarea>
                         </div>
 
-                        <button type="button" class="admin-btn-primary">
-                            Simpan Pengaturan
+                        <div>
+                            <label>Status</label>
+                            <select name="is_active">
+                                <option value="1">Aktif</option>
+                                <option value="0">Nonaktif</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="admin-btn-primary">
+                            Tambah Opsi
                         </button>
                     </form>
+
+                    <div class="admin-service-list">
+                        @foreach ($pickupOptions as $option)
+                            <div class="admin-service-item">
+                                <div class="admin-service-icon">
+                                    <i class="bi bi-truck"></i>
+                                </div>
+
+                                <div>
+                                    <strong>{{ $option->name }}</strong>
+                                    <span>{{ $option->code }} • {{ $option->is_active ? 'Aktif' : 'Nonaktif' }}</span>
+                                </div>
+
+                                <form method="POST" action="{{ route('admin.pickup-options.delete', $option->id) }}" class="ms-auto">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" onclick="return confirm('Hapus opsi ini?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </section>
         </main>
     </section>
+@endsection
+
+@section('scripts')
+    <script>
+        const weightSelect = document.getElementById('weightOrderSelect');
+        const weightForm = document.getElementById('adminWeightForm');
+
+        weightSelect?.addEventListener('change', () => {
+            if (weightSelect.value) {
+                weightForm.action = weightSelect.value;
+            }
+        });
+
+        const cashSelect = document.getElementById('cashOrderSelect');
+        const cashForm = document.getElementById('adminCashForm');
+
+        cashSelect?.addEventListener('change', () => {
+            if (cashSelect.value) {
+                cashForm.action = cashSelect.value;
+            }
+        });
+
+        const searchInput = document.getElementById('adminSearchInput');
+        const rows = document.querySelectorAll('#adminOrderTable tbody tr');
+
+        searchInput?.addEventListener('input', () => {
+            const keyword = searchInput.value.toLowerCase();
+
+            rows.forEach((row) => {
+                row.style.display = row.textContent.toLowerCase().includes(keyword) ? '' : 'none';
+            });
+        });
+    </script>
 @endsection
