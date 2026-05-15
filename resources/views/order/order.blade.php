@@ -13,37 +13,32 @@
         <div class="order-orb order-orb-2"></div>
 
         <div class="container position-relative z-index-1">
+            <div class="order-header" data-aos="fade-up">
+                <span class="order-eyebrow">
+                    <i class="bi bi-bag-heart"></i>
+                    Pesan Laundry
+                </span>
 
-            {{-- Step Info --}}
-            <div class="order-steps" data-aos="fade-up" data-aos-delay="100">
-                <div class="order-step active">
-                    <span>1</span>
-                    <div>
-                        <strong>Isi Data</strong>
-                        <small>Nama, nomor, alamat</small>
-                    </div>
-                </div>
+                <h1>
+                    Pesan laundry
+                    <span>tanpa ribet.</span>
+                </h1>
 
-                <div class="order-step">
-                    <span>2</span>
-                    <div>
-                        <strong>Pilih Layanan</strong>
-                        <small>Paket, wangi, antar-jemput</small>
-                    </div>
-                </div>
-
-                <div class="order-step">
-                    <span>3</span>
-                    <div>
-                        <strong>Konfirmasi</strong>
-                        <small>Pesanan masuk ke admin</small>
-                    </div>
-                </div>
+                <p>
+                    Isi data singkat, pilih layanan, lalu pesanan akan masuk ke admin Triowash untuk dikonfirmasi.
+                </p>
             </div>
 
             <div class="order-layout">
                 {{-- Form --}}
-                <form class="order-form" id="orderForm" data-aos="fade-right" data-aos-duration="900">
+                <form
+                    class="order-form"
+                    id="orderForm"
+                    method="POST"
+                    action="/pesan"
+                    data-aos="fade-right"
+                    data-aos-duration="900"
+                >
                     @csrf
 
                     {{-- Data Pelanggan --}}
@@ -59,58 +54,66 @@
                             </div>
                         </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="customerName" class="order-label">Nama Lengkap</label>
+                        <div class="order-form-grid">
+                            <div class="order-field">
+                                <label for="customerName">Nama Lengkap</label>
                                 <input
                                     type="text"
-                                    class="order-input"
                                     id="customerName"
-                                    name="customer_name"
+                                    name="name"
                                     placeholder="Contoh: Budi Santoso"
+                                    value="{{ old('name') }}"
                                 >
-                                <small class="order-error" data-error="customerName"></small>
+                                <small class="order-error" data-error="customerName">
+                                    @error('name') {{ $message }} @enderror
+                                </small>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="customerPhone" class="order-label">Nomor Telepon</label>
+                            <div class="order-field">
+                                <label for="customerPhone">Nomor Telepon</label>
                                 <input
                                     type="tel"
-                                    class="order-input"
                                     id="customerPhone"
-                                    name="customer_phone"
+                                    name="phone"
                                     placeholder="Contoh: 081234567890"
+                                    value="{{ old('phone') }}"
                                 >
-                                <small class="order-error" data-error="customerPhone"></small>
+                                <small class="order-error" data-error="customerPhone">
+                                    @error('phone') {{ $message }} @enderror
+                                </small>
                             </div>
 
-                            <div class="col-12">
-                                <label for="customerAddress" class="order-label">Alamat Lengkap</label>
+                            <div class="order-field full">
+                                <label for="customerAddress">Alamat Lengkap</label>
                                 <textarea
-                                    class="order-input order-textarea"
                                     id="customerAddress"
-                                    name="customer_address"
+                                    name="address"
                                     rows="3"
                                     placeholder="Contoh: Jl. Merpati No. 12, Banjarmasin"
-                                ></textarea>
-                                <small class="order-error" data-error="customerAddress"></small>
+                                >{{ old('address') }}</textarea>
+                                <small class="order-error" data-error="customerAddress">
+                                    @error('address') {{ $message }} @enderror
+                                </small>
                             </div>
 
-                            <div class="col-12">
-                                <label for="googleMapsLink" class="order-label">Link Google Maps <span>opsional</span></label>
+                            <div class="order-field full">
+                                <label for="googleMapsLink">
+                                    Link Google Maps
+                                    <span>opsional</span>
+                                </label>
                                 <input
                                     type="url"
-                                    class="order-input"
                                     id="googleMapsLink"
-                                    name="google_maps_link"
+                                    name="google_maps"
                                     placeholder="https://maps.app.goo.gl/..."
+                                    value="{{ old('google_maps') }}"
                                 >
                                 <small class="order-hint">Link Maps membantu kurir menemukan alamat lebih cepat.</small>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Paket Layanan --}}
+                    {{-- Pilihan Pesanan --}}
                     <div class="order-card">
                         <div class="order-card-header">
                             <div class="order-card-icon">
@@ -118,207 +121,96 @@
                             </div>
 
                             <div>
-                                <h2>Paket Layanan</h2>
-                                <p>Pilih jenis pengerjaan utama untuk cucian kamu.</p>
+                                <h2>Detail Pesanan</h2>
+                                <p>Pilih layanan, wangi, dan opsi antar jemput.</p>
                             </div>
                         </div>
 
-                        <div class="order-option-grid">
-                            <label class="order-option-card">
-                                <input
-                                    type="radio"
-                                    name="service_package"
-                                    value="setrika_lipat"
-                                    data-name="Cuci Komplit"
-                                    data-price="5000"
-                                    checked
-                                >
-
-                                <span class="order-option-icon">
+                        <div class="order-select-grid">
+                            <div class="order-select-box">
+                                <label for="serviceSelect">Paket Layanan</label>
+                                <div class="order-select">
                                     <i class="bi bi-basket3"></i>
-                                </span>
+                                    <select id="serviceSelect" name="service_id">
+                                        <option value="1" data-name="Setrika + Lipat" data-display-name="Cuci Komplit" data-price="5000">
+                                            Cuci Komplit - Rp5.000/kg
+                                        </option>
+                                        <option value="2" data-name="Lipat Saja" data-display-name="Cuci Kering" data-price="3000">
+                                            Cuci Kering - Rp3.000/kg
+                                        </option>
+                                        <option value="3" data-name="Setrika Saja" data-display-name="Setrika Saja" data-price="4000">
+                                            Setrika Saja - Rp4.000/kg
+                                        </option>
+                                    </select>
+                                </div>
+                                <small class="order-error" data-error="service_id">
+                                    @error('service_id') {{ $message }} @enderror
+                                </small>
+                            </div>
 
-                                <strong>Cuci Komplit</strong>
-                                <small>Cuci, kering, setrika, dan lipat.</small>
-                                <em>Rp5.000/kg</em>
-                            </label>
+                            <div class="order-select-box">
+                                <label for="fragranceSelect">Pilihan Wangi</label>
+                                <div class="order-select">
+                                    <i class="bi bi-stars"></i>
+                                    <select id="fragranceSelect" name="fragrance_id">
+                                        <option value="4" data-name="Wangi Bunga" data-price="1000">
+                                            Wangi Bunga - Rp1.000/kg
+                                        </option>
+                                        <option value="5" data-name="Wangi Sport" data-price="1000">
+                                            Wangi Sport - Rp1.000/kg
+                                        </option>
+                                        <option value="6" data-name="Wangi Original" data-price="0">
+                                            Original - Gratis
+                                        </option>
+                                    </select>
+                                </div>
+                                <small class="order-error" data-error="fragrance_id">
+                                    @error('fragrance_id') {{ $message }} @enderror
+                                </small>
+                            </div>
 
-                            <label class="order-option-card">
-                                <input
-                                    type="radio"
-                                    name="service_package"
-                                    value="lipat_saja"
-                                    data-name="Cuci Kering"
-                                    data-price="3000"
-                                >
+                            <div class="order-select-box full">
+                                <label for="pickupSelect">Opsi Antar-Jemput</label>
+                                <div class="order-select">
+                                    <i class="bi bi-truck"></i>
+                                    <select id="pickupSelect" name="pickup_type">
+                                        <option value="dijemput_antar" data-name="Dijemput & Diantar">
+                                            Dijemput & Diantar
+                                        </option>
+                                        <option value="dijemput_saja" data-name="Dijemput Saja">
+                                            Dijemput Saja
+                                        </option>
+                                        <option value="diantar_saja" data-name="Diantar Saja">
+                                            Diantar Saja
+                                        </option>
+                                        <option value="antar_ambil_sendiri" data-name="Antar & Ambil Sendiri">
+                                            Antar & Ambil Sendiri
+                                        </option>
+                                    </select>
+                                </div>
+                                <small class="order-error" data-error="pickup_type">
+                                    @error('pickup_type') {{ $message }} @enderror
+                                </small>
+                            </div>
 
-                                <span class="order-option-icon">
-                                    <i class="bi bi-wind"></i>
-                                </span>
-
-                                <strong>Cuci Kering</strong>
-                                <small>Cuci dan kering tanpa setrika.</small>
-                                <em>Rp3.000/kg</em>
-                            </label>
-
-                            <label class="order-option-card">
-                                <input
-                                    type="radio"
-                                    name="service_package"
-                                    value="setrika_saja"
-                                    data-name="Setrika Saja"
-                                    data-price="4000"
-                                >
-
-                                <span class="order-option-icon">
-                                    <i class="bi bi-lightning-charge"></i>
-                                </span>
-
-                                <strong>Setrika Saja</strong>
-                                <small>Pakaian bersih dirapikan.</small>
-                                <em>Rp4.000/kg</em>
-                            </label>
+                            <div class="order-field full">
+                                <label for="orderNote">Catatan Tambahan <span>opsional</span></label>
+                                <textarea
+                                    id="orderNote"
+                                    name="notes"
+                                    rows="3"
+                                    placeholder="Contoh: Tolong pisahkan baju putih dan berwarna."
+                                >{{ old('notes') }}</textarea>
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Pilihan Wangi --}}
-                    <div class="order-card">
-                        <div class="order-card-header">
-                            <div class="order-card-icon">
-                                <i class="bi bi-stars"></i>
-                            </div>
-
-                            <div>
-                                <h2>Pilihan Wangi</h2>
-                                <p>Pilih aroma sesuai preferensi kamu.</p>
-                            </div>
+                    <div class="order-mobile-summary">
+                        <div>
+                            <span>Estimasi harga per kg</span>
+                            <strong id="mobileSummaryPrice">Rp6.000/kg</strong>
                         </div>
-
-                        <div class="order-pill-group">
-                            <label class="order-pill">
-                                <input
-                                    type="radio"
-                                    name="perfume"
-                                    value="bunga"
-                                    data-name="Wangi Bunga"
-                                    data-price="1000"
-                                    checked
-                                >
-                                <span>Wangi Bunga</span>
-                                <small>+Rp1.000/kg</small>
-                            </label>
-
-                            <label class="order-pill">
-                                <input
-                                    type="radio"
-                                    name="perfume"
-                                    value="sport"
-                                    data-name="Wangi Sport"
-                                    data-price="1000"
-                                >
-                                <span>Wangi Sport</span>
-                                <small>+Rp1.000/kg</small>
-                            </label>
-
-                            <label class="order-pill">
-                                <input
-                                    type="radio"
-                                    name="perfume"
-                                    value="original"
-                                    data-name="Wangi Original"
-                                    data-price="0"
-                                >
-                                <span>Original</span>
-                                <small>Gratis</small>
-                            </label>
-                        </div>
-                    </div>
-
-                    {{-- Opsi Antar Jemput --}}
-                    <div class="order-card">
-                        <div class="order-card-header">
-                            <div class="order-card-icon">
-                                <i class="bi bi-truck"></i>
-                            </div>
-
-                            <div>
-                                <h2>Opsi Antar-Jemput</h2>
-                                <p>Tentukan bagaimana pakaian diambil dan dikembalikan.</p>
-                            </div>
-                        </div>
-
-                        <div class="order-delivery-grid">
-                            <label class="order-delivery-card">
-                                <input
-                                    type="radio"
-                                    name="delivery_option"
-                                    value="pickup_delivery"
-                                    data-name="Dijemput & Diantar"
-                                    checked
-                                >
-                                <i class="bi bi-truck"></i>
-                                <span>Dijemput & Diantar</span>
-                                <small>Kurir ambil dan antar kembali.</small>
-                            </label>
-
-                            <label class="order-delivery-card">
-                                <input
-                                    type="radio"
-                                    name="delivery_option"
-                                    value="pickup_only"
-                                    data-name="Dijemput Saja"
-                                >
-                                <i class="bi bi-box-arrow-in-down"></i>
-                                <span>Dijemput Saja</span>
-                                <small>Kurir hanya mengambil pakaian.</small>
-                            </label>
-
-                            <label class="order-delivery-card">
-                                <input
-                                    type="radio"
-                                    name="delivery_option"
-                                    value="delivery_only"
-                                    data-name="Diantar Saja"
-                                >
-                                <i class="bi bi-box-arrow-up"></i>
-                                <span>Diantar Saja</span>
-                                <small>Pelanggan antar, kurir mengantar pulang.</small>
-                            </label>
-
-                            <label class="order-delivery-card">
-                                <input
-                                    type="radio"
-                                    name="delivery_option"
-                                    value="self_service"
-                                    data-name="Antar & Ambil Sendiri"
-                                >
-                                <i class="bi bi-shop"></i>
-                                <span>Antar & Ambil Sendiri</span>
-                                <small>Cocok untuk pelanggan walk-in.</small>
-                            </label>
-                        </div>
-                    </div>
-
-                    {{-- Catatan --}}
-                    <div class="order-card">
-                        <div class="order-card-header">
-                            <div class="order-card-icon">
-                                <i class="bi bi-chat-left-text"></i>
-                            </div>
-
-                            <div>
-                                <h2>Catatan Tambahan</h2>
-                                <p>Tulis permintaan khusus jika ada.</p>
-                            </div>
-                        </div>
-
-                        <textarea
-                            class="order-input order-textarea"
-                            id="orderNote"
-                            name="order_note"
-                            rows="3"
-                            placeholder="Contoh: Tolong pisahkan baju putih dan berwarna."
-                        ></textarea>
+                        <small>Total akhir dihitung setelah cucian ditimbang admin.</small>
                     </div>
 
                     <button type="submit" class="btn btn-primary order-submit-button shadow-primary">
@@ -405,9 +297,10 @@
                     <i class="bi bi-check2-circle"></i>
                 </div>
 
-                <h4>Frontend pemesanan sudah siap</h4>
+                <h4>Form pemesanan sudah siap</h4>
                 <p>
-                    Untuk saat ini data belum dikirim ke database karena backend pemesanan akan dibuat setelah ini.
+                    Struktur field sudah disesuaikan untuk backend. Setelah controller dibuat,
+                    data akan disimpan ke database.
                 </p>
 
                 <button type="button" class="btn btn-primary btn-modern" data-close-modal>

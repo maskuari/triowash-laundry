@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initOrderSummary() {
     const watchedInputs = document.querySelectorAll(
-        '#customerName, #customerPhone, input[name="service_package"], input[name="perfume"], input[name="delivery_option"]'
+        '#customerName, #customerPhone, #serviceSelect, #fragranceSelect, #pickupSelect'
     );
 
     watchedInputs.forEach((input) => {
@@ -21,21 +21,33 @@ function updateOrderSummary() {
     const name = document.getElementById('customerName')?.value.trim();
     const phone = document.getElementById('customerPhone')?.value.trim();
 
-    const selectedService = document.querySelector('input[name="service_package"]:checked');
-    const selectedPerfume = document.querySelector('input[name="perfume"]:checked');
-    const selectedDelivery = document.querySelector('input[name="delivery_option"]:checked');
+    const selectedService = getSelectedOption('serviceSelect');
+    const selectedFragrance = getSelectedOption('fragranceSelect');
+    const selectedPickup = getSelectedOption('pickupSelect');
 
     setText('summaryName', name || 'Belum diisi');
     setText('summaryPhone', phone || 'Belum diisi');
-    setText('summaryService', selectedService?.dataset.name || '-');
-    setText('summaryPerfume', selectedPerfume?.dataset.name || '-');
-    setText('summaryDelivery', selectedDelivery?.dataset.name || '-');
+    setText('summaryService', selectedService?.dataset.displayName || selectedService?.dataset.name || '-');
+    setText('summaryPerfume', selectedFragrance?.dataset.name || '-');
+    setText('summaryDelivery', selectedPickup?.dataset.name || '-');
 
     const servicePrice = Number(selectedService?.dataset.price || 0);
-    const perfumePrice = Number(selectedPerfume?.dataset.price || 0);
-    const totalPerKg = servicePrice + perfumePrice;
+    const fragrancePrice = Number(selectedFragrance?.dataset.price || 0);
+    const totalPerKg = servicePrice + fragrancePrice;
+    const formattedPrice = formatRupiah(totalPerKg) + '/kg';
 
-    setText('summaryPrice', formatRupiah(totalPerKg) + '/kg');
+    setText('summaryPrice', formattedPrice);
+    setText('mobileSummaryPrice', formattedPrice);
+}
+
+function getSelectedOption(selectId) {
+    const select = document.getElementById(selectId);
+
+    if (!select) {
+        return null;
+    }
+
+    return select.options[select.selectedIndex];
 }
 
 function initOrderValidation() {
@@ -46,18 +58,22 @@ function initOrderValidation() {
     }
 
     form.addEventListener('submit', (event) => {
-        event.preventDefault();
-
         clearErrors();
 
         const isValid = validateOrderForm();
 
         if (!isValid) {
+            event.preventDefault();
             scrollToFirstError();
             return;
         }
 
-        showOrderModal();
+        const backendReady = form.dataset.backendReady === 'true';
+
+        if (!backendReady) {
+            event.preventDefault();
+            showOrderModal();
+        }
     });
 }
 
@@ -68,9 +84,9 @@ function validateOrderForm() {
     const phoneInput = document.getElementById('customerPhone');
     const addressInput = document.getElementById('customerAddress');
 
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-    const address = addressInput.value.trim();
+    const name = nameInput?.value.trim();
+    const phone = phoneInput?.value.trim();
+    const address = addressInput?.value.trim();
 
     if (!name) {
         setError('customerName', 'Nama lengkap wajib diisi.');
@@ -113,7 +129,7 @@ function setError(inputId, message) {
 }
 
 function clearErrors() {
-    document.querySelectorAll('.order-input').forEach((input) => {
+    document.querySelectorAll('.order-field input, .order-field textarea').forEach((input) => {
         input.classList.remove('is-invalid');
     });
 
@@ -123,7 +139,7 @@ function clearErrors() {
 }
 
 function scrollToFirstError() {
-    const firstInvalid = document.querySelector('.order-input.is-invalid');
+    const firstInvalid = document.querySelector('.is-invalid');
 
     if (!firstInvalid) {
         return;
