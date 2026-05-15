@@ -145,17 +145,23 @@ function initOrderMap() {
     const mapElement = document.getElementById('orderMap');
 
     if (!mapElement || typeof L === 'undefined') {
+        console.warn('Leaflet belum terbaca atau elemen orderMap tidak ditemukan.');
         return;
     }
 
+    const oldLat = Number(document.getElementById('latitude')?.value);
+    const oldLng = Number(document.getElementById('longitude')?.value);
+
     const defaultLocation = {
-        lat: -3.318606,
-        lng: 114.594378,
+        lat: !Number.isNaN(oldLat) && oldLat ? oldLat : -3.318606,
+        lng: !Number.isNaN(oldLng) && oldLng ? oldLng : 114.594378,
     };
 
-    const map = L.map('orderMap').setView([defaultLocation.lat, defaultLocation.lng], 13);
+    const map = L.map('orderMap', {
+        scrollWheelZoom: false,
+    }).setView([defaultLocation.lat, defaultLocation.lng], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap',
     }).addTo(map);
@@ -163,6 +169,10 @@ function initOrderMap() {
     const marker = L.marker([defaultLocation.lat, defaultLocation.lng], {
         draggable: true,
     }).addTo(map);
+
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 300);
 
     updateLocation(defaultLocation.lat, defaultLocation.lng);
 
@@ -199,6 +209,10 @@ function initOrderMap() {
                 marker.setLatLng([lat, lng]);
                 updateLocation(lat, lng);
 
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 200);
+
                 locationButton.disabled = false;
                 locationButton.innerHTML = '<i class="bi bi-geo-alt"></i> Lokasi Saya';
             },
@@ -207,6 +221,11 @@ function initOrderMap() {
 
                 locationButton.disabled = false;
                 locationButton.innerHTML = '<i class="bi bi-geo-alt"></i> Lokasi Saya';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
             }
         );
     });
@@ -219,7 +238,12 @@ async function updateLocation(lat, lng) {
 
     try {
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`,
+            {
+                headers: {
+                    'Accept': 'application/json',
+                },
+            }
         );
 
         const data = await response.json();

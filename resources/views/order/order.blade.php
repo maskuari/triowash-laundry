@@ -3,7 +3,11 @@
 @section('title', 'Pesan Laundry')
 
 @section('styles')
-    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        crossorigin=""
+    >
     <link href="{{ asset('css/order.css') }}" rel="stylesheet">
 @endsection
 
@@ -327,6 +331,9 @@
 @endsection
 
 @section('scripts')
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        crossorigin=""
+    ></script>
     <script src="{{ asset('js/order.js') }}"></script>
 @endsection
