@@ -49,6 +49,10 @@ class TrackingController extends Controller
                     'statusLogs',
                 ])
                 ->where('customer_id', $customer->id)
+                ->whereNotIn('status', [
+                    Order::STATUS_SELESAI_DITERIMA,
+                    Order::STATUS_DIBATALKAN,
+                ])
                 ->latest()
                 ->first();
         }

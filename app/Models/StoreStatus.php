@@ -19,4 +19,14 @@ class StoreStatus extends Model
     {
         return $this->is_open ? 'Buka' : 'Tutup';
     }
+
+    public function getPickupHoursLabelAttribute(): string
+    {
+        return '08:00 - 17:00 WITA';
+    }
+
+    public function getLaundryHoursLabelAttribute(): string
+    {
+        return '07:00 - 21:30 WITA';
+    }
 }

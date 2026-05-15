@@ -67,7 +67,7 @@
 }
 
 .home-hero-title {
-    margin-bottom: 1.35rem;
+    margin-bottom: 1.05rem;
     font-family: var(--font-heading);
     font-size: clamp(2.9rem, 5.2vw, 5.1rem);
     font-weight: 900;
@@ -97,34 +97,152 @@
     font-weight: 600;
 }
 
-.home-store-status {
-    width: fit-content;
-    display: inline-flex;
+.home-hero-description-small {
+    max-width: 540px;
+    margin-bottom: 0.85rem;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.58;
+    font-weight: 600;
+}
+
+.home-info-wrap {
+    display: grid;
+    gap: 0.65rem;
+    max-width: 590px;
+    margin: 0.95rem 0 1.25rem;
+}
+
+.home-store-card {
+    padding: 0.9rem;
+    border: 1px solid rgba(226, 232, 240, 0.86);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.74);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 16px 44px rgba(15, 23, 42, 0.08);
+}
+
+.home-store-top {
+    display: flex;
     align-items: center;
-    gap: 0.55rem;
-    margin-bottom: 1.35rem;
-    padding: 0.65rem 0.9rem;
-    border-radius: 999px;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    margin-bottom: 0.72rem;
     color: #334155;
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(14px);
     font-size: 0.88rem;
     font-weight: 800;
+}
+
+.home-store-top strong {
+    color: #0f172a;
+    font-weight: 900;
+}
+
+.home-store-top span {
+    color: #475569;
+    font-weight: 700;
 }
 
 .home-store-status-dot {
     width: 10px;
     height: 10px;
+    margin-right: 0.15rem;
     border-radius: 999px;
     background: #ef4444;
+    flex-shrink: 0;
 }
 
 .home-store-status-dot.open {
     background: #22c55e;
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.14);
 }
 
 .home-store-status-dot.closed {
     background: #ef4444;
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.14);
+}
+
+.home-store-hours {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.home-store-hours div {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    column-gap: 0.55rem;
+    align-items: center;
+    padding: 0.7rem;
+    border-radius: 18px;
+    background: #f8fafc;
+}
+
+.home-store-hours i {
+    width: 34px;
+    height: 34px;
+    grid-row: span 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    color: var(--primary);
+    background: #dbeafe;
+}
+
+.home-store-hours span {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.home-store-hours strong {
+    color: #0f172a;
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.home-location-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(226, 232, 240, 0.88);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.06);
+}
+
+.home-location-card i {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 14px;
+    color: #ffffff;
+    background: var(--gradient);
+}
+
+.home-location-card span,
+.home-location-card strong {
+    display: block;
+}
+
+.home-location-card span {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.home-location-card strong {
+    color: #0f172a;
+    font-size: 0.86rem;
+    font-weight: 900;
 }
 
 .home-hero-actions {
@@ -246,7 +364,7 @@
     top: 18%;
     right: 3%;
     z-index: 3;
-    min-width: 210px;
+    min-width: 230px;
     display: flex;
     align-items: center;
     gap: 0.85rem;
@@ -268,7 +386,7 @@
 
 .home-floating-card span {
     color: var(--muted);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     font-weight: 700;
 }
 
@@ -536,17 +654,22 @@
 
     .home-hero-content,
     .home-hero-description,
-    .home-stats {
+    .home-hero-description-small,
+    .home-stats,
+    .home-info-wrap {
         margin-inline: auto;
     }
 
-    .home-hero-badge,
-    .home-store-status {
+    .home-hero-badge {
         margin-inline: auto;
     }
 
     .home-hero-actions {
         justify-content: center;
+    }
+
+    .home-location-card {
+        margin-inline: auto;
     }
 
     .home-visual {
@@ -620,13 +743,6 @@
         font-size: 0.82rem;
     }
 
-    .home-store-status {
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 1rem;
-        font-size: 0.76rem;
-    }
-
     .home-mobile-visual {
         display: flex;
         justify-content: center;
@@ -651,6 +767,53 @@
         margin: 0 auto 0.9rem;
         font-size: 0.8rem;
         line-height: 1.55;
+    }
+
+    .home-hero-description-small {
+        max-width: 92%;
+        margin: 0 auto 0.8rem;
+        font-size: 0.78rem;
+        line-height: 1.5;
+    }
+
+    .home-info-wrap {
+        max-width: 100%;
+        margin: 0.85rem auto 1rem;
+    }
+
+    .home-store-card {
+        padding: 0.8rem;
+        border-radius: 20px;
+    }
+
+    .home-store-top {
+        justify-content: center;
+        font-size: 0.78rem;
+        line-height: 1.45;
+    }
+
+    .home-store-hours {
+        grid-template-columns: 1fr;
+    }
+
+    .home-store-hours div {
+        padding: 0.62rem;
+        text-align: left;
+    }
+
+    .home-store-hours strong {
+        font-size: 0.76rem;
+    }
+
+    .home-location-card {
+        width: 100%;
+        padding: 0.7rem;
+        border-radius: 18px;
+        text-align: left;
+    }
+
+    .home-location-card strong {
+        font-size: 0.78rem;
     }
 
     .home-hero-actions {

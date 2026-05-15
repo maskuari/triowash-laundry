@@ -7,7 +7,6 @@
 @endsection
 
 @section('content')
-    {{-- Hero --}}
     <section class="home-hero">
         <div class="home-hero-orb home-hero-orb-1"></div>
         <div class="home-hero-orb home-hero-orb-2"></div>
@@ -16,18 +15,9 @@
             <div class="row align-items-center home-hero-row">
                 <div class="col-lg-6" data-aos="fade-right" data-aos-duration="900">
                     <div class="home-hero-content">
-                        <div class="home-hero-badge">
-                            <i class="bi bi-stars"></i>
-                            Laundry praktis tanpa akun
-                        </div>
-
-                        {{-- Mobile Image --}}
                         <div class="home-mobile-visual">
-                            <img
-                                src="{{ asset('assets/images/baju.png') }}"
-                                alt="Triowash Laundry Service"
-                                class="home-hero-image"
-                            >
+                            <img src="{{ asset('assets/images/baju.png') }}" alt="Triowash Laundry Service"
+                                class="home-hero-image">
                         </div>
 
                         <h1 class="home-hero-title">
@@ -35,22 +25,47 @@
                             <strong>Layanan Praktis.</strong>
                         </h1>
 
-                        <p class="home-hero-description">
-                            Antar jemput gratis untuk wilayah Banjarmasin.
-                            Cuci bersih, wangi, dan rapi tanpa perlu keluar rumah.
+                        <p class="home-hero-description home-hero-description-small">
+                            Antar jemput untuk wilayah Banjarmasin. Cuci bersih, wangi, dan rapi tanpa perlu keluar rumah.
                             Sistem bayar di akhir yang aman dan transparan.
                         </p>
 
-                        <div class="home-store-status">
-                            <div class="home-store-status-dot {{ $storeStatus?->is_open ? 'open' : 'closed' }}"></div>
-                            <span>
-                                Toko {{ $storeStatus?->label ?? 'Buka' }}
-                                @if ($storeStatus?->status_note)
-                                    • {{ $storeStatus->status_note }}
-                                @else
-                                    • 08.00 - 21.00 WITA
-                                @endif
-                            </span>
+                        <div class="home-info-wrap">
+                            <div class="home-store-card">
+                                <div class="home-store-top">
+                                    <div class="home-store-status-dot {{ $storeStatus?->is_open ? 'open' : 'closed' }}">
+                                    </div>
+                                    <strong>Toko {{ $storeStatus?->label ?? 'Buka' }}</strong>
+
+                                    @if ($storeStatus?->status_note)
+                                        <span>{{ $storeStatus->status_note }}</span>
+                                    @else
+                                        <span>Kami siap melayani antar jemput hari ini.</span>
+                                    @endif
+                                </div>
+
+                                <div class="home-store-hours">
+                                    <div>
+                                        <i class="bi bi-truck"></i>
+                                        <span>Antar jemput</span>
+                                        <strong>08:00 - 17:00 WITA</strong>
+                                    </div>
+
+                                    <div>
+                                        <i class="bi bi-shop"></i>
+                                        <span>Laundry</span>
+                                        <strong>07:00 - 21:30 WITA</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="home-location-card">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                <div>
+                                    <span>Lokasi</span>
+                                    <strong>Triowash - Pangeran, Banjarmasin.</strong>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="home-hero-actions">
@@ -68,14 +83,14 @@
                         <div class="home-stats">
                             <div class="home-stat-card">
                                 <i class="bi bi-truck home-stat-icon"></i>
-                                <strong>Gratis</strong>
+                                <strong>08-17</strong>
                                 <span>Antar Jemput</span>
                             </div>
 
                             <div class="home-stat-card">
                                 <i class="bi bi-grid-1x2 home-stat-icon home-stat-icon-blue"></i>
                                 <strong>{{ $services->count() }}+</strong>
-                                <span>Pilihan Layanan</span>
+                                <span>Pilihan Paket</span>
                             </div>
 
                             <div class="home-stat-card">
@@ -87,16 +102,12 @@
                     </div>
                 </div>
 
-                {{-- Desktop Image --}}
                 <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
                     <div class="home-visual">
                         <div class="home-visual-glow"></div>
 
-                        <img
-                            src="{{ asset('assets/images/baju.png') }}"
-                            alt="Triowash Laundry Service"
-                            class="home-hero-image"
-                        >
+                        <img src="{{ asset('assets/images/baju.png') }}" alt="Triowash Laundry Service"
+                            class="home-hero-image">
 
                         <div class="home-floating-card">
                             <div class="home-floating-icon">
@@ -105,7 +116,7 @@
 
                             <div>
                                 <h6>Bersih & Wangi</h6>
-                                <span>Siap dipakai</span>
+                                <span>Triowash - Pangeran, Banjarmasin</span>
                             </div>
                         </div>
                     </div>
@@ -114,7 +125,6 @@
         </div>
     </section>
 
-    {{-- Layanan --}}
     <section id="layanan" class="section-padding home-services">
         <div class="container">
             <div class="home-services-preview">
@@ -137,8 +147,8 @@
                             </div>
 
                             <div>
-                                <h5>Belum ada layanan</h5>
-                                <p>Data layanan akan tampil setelah admin menambahkan layanan.</p>
+                                <h5>Belum ada paket</h5>
+                                <p>Data paket akan tampil setelah admin menambahkan paket.</p>
                             </div>
                         </div>
                     @endforelse
@@ -156,8 +166,8 @@
                     </h2>
 
                     <p>
-                        Kami menyediakan layanan utama yang simpel dan praktis. Untuk detail pilihan layanan,
-                        berat cucian, dan proses pemesanan, pelanggan bisa langsung masuk ke halaman pesan.
+                        Kami menyediakan paket laundry, pilihan layanan regular atau express,
+                        pilihan wangi, dan opsi antar jemput yang bisa dipilih langsung saat pemesanan.
                     </p>
 
                     <a href="/pesan" class="btn btn-primary btn-modern shadow-primary home-services-button">
@@ -169,7 +179,6 @@
         </div>
     </section>
 
-    {{-- Keunggulan --}}
     <section id="keunggulan" class="section-padding home-advantages">
         <div class="container">
             <div class="section-heading text-center" data-aos="fade-up">
@@ -196,7 +205,7 @@
                         </div>
 
                         <h5>Antar Jemput</h5>
-                        <p>Kamu cukup pesan dari rumah atau kos, kurir kami yang ambil dan antar pakaianmu.</p>
+                        <p>Antar jemput tersedia dari jam 08:00 sampai 17:00 WITA.</p>
                     </div>
                 </div>
 
@@ -225,7 +234,6 @@
         </div>
     </section>
 
-    {{-- Testimoni --}}
     @if ($testimonials->isNotEmpty())
         <section class="section-padding home-testimonials">
             <div class="container">

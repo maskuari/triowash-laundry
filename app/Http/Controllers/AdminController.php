@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\PickupOption;
 use App\Models\Service;
 use App\Models\StatusLog;
+use App\Models\StoreStatus;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -66,9 +67,13 @@ class AdminController extends Controller
             ->sum('amount');
 
         $services = Service::query()
-            ->orderBy('category')
+            ->orderByRaw("FIELD(category, 'paket', 'layanan', 'wangi')")
             ->orderBy('price_per_kg')
             ->get();
+
+        $packages = $services->where('category', Service::CATEGORY_PAKET);
+        $serviceTypes = $services->where('category', Service::CATEGORY_LAYANAN);
+        $fragrances = $services->where('category', Service::CATEGORY_WANGI);
 
         $pickupOptions = PickupOption::query()
             ->orderByDesc('is_active')
@@ -78,6 +83,14 @@ class AdminController extends Controller
         $paymentOrders = $allOrders
             ->where('total_price', '>', 0)
             ->where('payment_status', Order::PAYMENT_UNPAID);
+
+        $storeStatus = StoreStatus::query()->firstOrCreate(
+            ['id' => 1],
+            [
+                'is_open' => true,
+                'status_note' => 'Laundry buka normal.',
+            ]
+        );
 
         $stats = [
             'incoming_orders' => $allOrders->where('status', Order::STATUS_MENUNGGU_VERIFIKASI)->count(),
@@ -108,7 +121,11 @@ class AdminController extends Controller
             'cancelledOrders' => $cancelledOrders,
             'paymentOrders' => $paymentOrders,
             'services' => $services,
+            'packages' => $packages,
+            'serviceTypes' => $serviceTypes,
+            'fragrances' => $fragrances,
             'pickupOptions' => $pickupOptions,
+            'storeStatus' => $storeStatus,
             'stats' => $stats,
             'searchMasuk' => $searchMasuk,
             'searchDiproses' => $searchDiproses,
@@ -136,7 +153,8 @@ class AdminController extends Controller
                             ->orWhere('phone', 'like', "%{$search}%")
                             ->orWhere('address', 'like', "%{$search}%")
                             ->orWhere('city', 'like', "%{$search}%")
-                            ->orWhere('district', 'like', "%{$search}%");
+                            ->orWhere('district', 'like', "%{$search}%")
+                            ->orWhere('village', 'like', "%{$search}%");
                     })
                     ->orWhereHas('orderItems.service', function ($serviceQuery) use ($search) {
                         $serviceQuery
@@ -171,6 +189,10 @@ class AdminController extends Controller
 
     public function approveOrder(Order $order): RedirectResponse
     {
+        if ($this->isLockedOrder($order)) {
+            return back()->with('error', 'Pesanan sudah selesai diterima dan tidak bisa diubah lagi.');
+        }
+
         $this->changeStatus(
             order: $order,
             newStatus: Order::STATUS_DIJEMPUT,
@@ -184,6 +206,10 @@ class AdminController extends Controller
 
     public function rejectOrder(Order $order): RedirectResponse
     {
+        if ($this->isLockedOrder($order)) {
+            return back()->with('error', 'Pesanan sudah selesai diterima dan tidak bisa ditolak/dihapus dari proses.');
+        }
+
         $orderCode = $order->order_code;
 
         $order->delete();
@@ -204,8 +230,38 @@ class AdminController extends Controller
             ->with('success', "Pesanan {$orderCode} berhasil dihapus.");
     }
 
+    public function approveAllIncomingOrders(): RedirectResponse
+    {
+        $orders = Order::query()
+            ->where('status', Order::STATUS_MENUNGGU_VERIFIKASI)
+            ->get();
+
+        foreach ($orders as $order) {
+            $this->changeStatus(
+                order: $order,
+                newStatus: Order::STATUS_DIJEMPUT,
+                description: 'Pesanan disetujui admin melalui tombol Terima Semua.'
+            );
+        }
+
+        return back()->with('success', $orders->count() . ' pesanan berhasil diterima.');
+    }
+
+    public function rejectAllIncomingOrders(): RedirectResponse
+    {
+        $count = Order::query()
+            ->where('status', Order::STATUS_MENUNGGU_VERIFIKASI)
+            ->delete();
+
+        return back()->with('success', $count . ' pesanan masuk berhasil ditolak dan dihapus.');
+    }
+
     public function updateWeight(Request $request, Order $order): RedirectResponse
     {
+        if ($this->isLockedOrder($order)) {
+            return back()->with('error', 'Pesanan sudah selesai diterima. Berat cucian tidak bisa diubah lagi.');
+        }
+
         $validated = $request->validate([
             'weight' => ['required', 'numeric', 'min:0.1', 'max:999'],
         ], [
@@ -217,7 +273,7 @@ class AdminController extends Controller
         $weight = (float) $validated['weight'];
 
         DB::transaction(function () use ($order, $weight) {
-            $order->load('orderItems.service');
+            $order->load(['orderItems.service', 'pickupOption']);
 
             $totalPrice = 0;
 
@@ -236,6 +292,10 @@ class AdminController extends Controller
                 ]);
 
                 $totalPrice += $subtotal;
+            }
+
+            if ($order->pickupOption && Schema::hasColumn('pickup_options', 'price')) {
+                $totalPrice += (int) $order->pickupOption->price;
             }
 
             $oldStatus = $order->status;
@@ -274,6 +334,10 @@ class AdminController extends Controller
 
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
+        if ($this->isLockedOrder($order)) {
+            return back()->with('error', 'Pesanan sudah selesai diterima. Status tidak bisa diubah lagi.');
+        }
+
         $validated = $request->validate([
             'status' => [
                 'required',
@@ -303,6 +367,10 @@ class AdminController extends Controller
 
     public function confirmCashPayment(Request $request, Order $order): RedirectResponse
     {
+        if ($this->isLockedOrder($order)) {
+            return back()->with('error', 'Pesanan sudah selesai diterima. Pembayaran tidak bisa diubah lagi.');
+        }
+
         $validated = $request->validate([
             'cash_received' => ['required', 'integer', 'min:' . max((int) $order->total_price, 1)],
         ], [
@@ -344,37 +412,37 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'service_name' => ['required', 'string', 'max:100'],
-            'category' => ['required', Rule::in(['paket', 'wangi'])],
+            'category' => ['required', Rule::in(['paket', 'layanan', 'wangi'])],
             'price_per_kg' => ['required', 'integer', 'min:0'],
         ]);
 
         Service::create($validated);
 
-        return back()->with('success', 'Layanan berhasil ditambahkan.');
+        return back()->with('success', 'Data berhasil ditambahkan.');
     }
 
     public function updateService(Request $request, Service $service): RedirectResponse
     {
         $validated = $request->validate([
             'service_name' => ['required', 'string', 'max:100'],
-            'category' => ['required', Rule::in(['paket', 'wangi'])],
+            'category' => ['required', Rule::in(['paket', 'layanan', 'wangi'])],
             'price_per_kg' => ['required', 'integer', 'min:0'],
         ]);
 
         $service->update($validated);
 
-        return back()->with('success', 'Layanan berhasil diperbarui.');
+        return back()->with('success', 'Data berhasil diperbarui.');
     }
 
     public function deleteService(Service $service): RedirectResponse
     {
         if ($service->orderItems()->exists()) {
-            return back()->with('error', 'Layanan tidak bisa dihapus karena sudah dipakai pada pesanan.');
+            return back()->with('error', 'Data tidak bisa dihapus karena sudah dipakai pada pesanan.');
         }
 
         $service->delete();
 
-        return back()->with('success', 'Layanan berhasil dihapus.');
+        return back()->with('success', 'Data berhasil dihapus.');
     }
 
     public function storePickupOption(Request $request): RedirectResponse
@@ -383,6 +451,7 @@ class AdminController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'code' => ['required', 'string', 'max:100', 'unique:pickup_options,code'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'price' => ['required', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -390,6 +459,7 @@ class AdminController extends Controller
             'name' => $validated['name'],
             'code' => str($validated['code'])->slug('_'),
             'description' => $validated['description'] ?? null,
+            'price' => $validated['price'],
             'is_active' => $request->boolean('is_active', true),
         ]);
 
@@ -407,6 +477,7 @@ class AdminController extends Controller
                 Rule::unique('pickup_options', 'code')->ignore($pickupOption->id),
             ],
             'description' => ['nullable', 'string', 'max:1000'],
+            'price' => ['required', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -414,6 +485,7 @@ class AdminController extends Controller
             'name' => $validated['name'],
             'code' => str($validated['code'])->slug('_'),
             'description' => $validated['description'] ?? null,
+            'price' => $validated['price'],
             'is_active' => $request->boolean('is_active'),
         ]);
 
@@ -429,6 +501,26 @@ class AdminController extends Controller
         $pickupOption->delete();
 
         return back()->with('success', 'Opsi antar jemput berhasil dihapus.');
+    }
+
+    public function updateStoreStatus(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'is_open' => ['required', 'boolean'],
+            'status_note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        StoreStatus::query()->updateOrCreate(
+            ['id' => 1],
+            $validated
+        );
+
+        return back()->with('success', 'Status toko berhasil diperbarui.');
+    }
+
+    private function isLockedOrder(Order $order): bool
+    {
+        return $order->status === Order::STATUS_SELESAI_DITERIMA;
     }
 
     private function changeStatus(Order $order, string $newStatus, string $description): void

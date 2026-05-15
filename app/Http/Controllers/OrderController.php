@@ -20,12 +20,17 @@ class OrderController extends Controller
     public function create(): View
     {
         $packages = Service::query()
-            ->where('category', 'paket')
+            ->where('category', Service::CATEGORY_PAKET)
+            ->orderBy('price_per_kg')
+            ->get();
+
+        $serviceTypes = Service::query()
+            ->where('category', Service::CATEGORY_LAYANAN)
             ->orderBy('price_per_kg')
             ->get();
 
         $fragrances = Service::query()
-            ->where('category', 'wangi')
+            ->where('category', Service::CATEGORY_WANGI)
             ->orderBy('price_per_kg')
             ->get();
 
@@ -36,6 +41,7 @@ class OrderController extends Controller
 
         return view('order.order', [
             'packages' => $packages,
+            'serviceTypes' => $serviceTypes,
             'fragrances' => $fragrances,
             'pickupOptions' => $pickupOptions,
         ]);
@@ -43,6 +49,14 @@ class OrderController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (now()->format('H:i') > '17:00') {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'pickup_option_id' => 'Pesanan antar jemput hanya diterima sampai jam 17:00 WITA. Pesanan yang lewat dari jam 17:00 akan ditolak.',
+                ]);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'min:10', 'max:20'],
@@ -59,11 +73,15 @@ class OrderController extends Controller
 
             'service_id' => [
                 'required',
-                Rule::exists('services', 'id')->where('category', 'paket'),
+                Rule::exists('services', 'id')->where('category', Service::CATEGORY_PAKET),
+            ],
+            'service_type_id' => [
+                'required',
+                Rule::exists('services', 'id')->where('category', Service::CATEGORY_LAYANAN),
             ],
             'fragrance_id' => [
                 'nullable',
-                Rule::exists('services', 'id')->where('category', 'wangi'),
+                Rule::exists('services', 'id')->where('category', Service::CATEGORY_WANGI),
             ],
             'pickup_option_id' => [
                 'required',
@@ -75,13 +93,19 @@ class OrderController extends Controller
             'phone.required' => 'Nomor telepon wajib diisi.',
             'phone.min' => 'Nomor telepon tidak valid, minimal 10 digit.',
             'address.required' => 'Detail alamat wajib diisi.',
-            'service_id.required' => 'Paket layanan wajib dipilih.',
+            'service_id.required' => 'Paket wajib dipilih.',
+            'service_type_id.required' => 'Layanan wajib dipilih.',
             'pickup_option_id.required' => 'Opsi antar jemput wajib dipilih.',
         ]);
 
         $package = Service::query()
             ->where('id', $validated['service_id'])
-            ->where('category', 'paket')
+            ->where('category', Service::CATEGORY_PAKET)
+            ->firstOrFail();
+
+        $serviceType = Service::query()
+            ->where('id', $validated['service_type_id'])
+            ->where('category', Service::CATEGORY_LAYANAN)
             ->firstOrFail();
 
         $fragrance = null;
@@ -89,7 +113,7 @@ class OrderController extends Controller
         if (!empty($validated['fragrance_id'])) {
             $fragrance = Service::query()
                 ->where('id', $validated['fragrance_id'])
-                ->where('category', 'wangi')
+                ->where('category', Service::CATEGORY_WANGI)
                 ->firstOrFail();
         }
 
@@ -98,7 +122,7 @@ class OrderController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        $order = DB::transaction(function () use ($validated, $package, $fragrance, $pickupOption) {
+        $order = DB::transaction(function () use ($validated, $package, $serviceType, $fragrance, $pickupOption) {
             $customer = Customer::updateOrCreate(
                 ['phone' => $validated['phone']],
                 [
@@ -135,6 +159,13 @@ class OrderController extends Controller
             OrderItem::create([
                 'order_id' => $order->id,
                 'service_id' => $package->id,
+                'qty' => 1,
+                'subtotal' => 0,
+            ]);
+
+            OrderItem::create([
+                'order_id' => $order->id,
+                'service_id' => $serviceType->id,
                 'qty' => 1,
                 'subtotal' => 0,
             ]);

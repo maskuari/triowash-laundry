@@ -9,6 +9,7 @@
 @php
     $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
     $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
+    $isLocked = $order->status === \App\Models\Order::STATUS_SELESAI_DITERIMA;
 @endphp
 
 @section('content')
@@ -65,6 +66,12 @@
                 </div>
             @endif
 
+            @if ($isLocked)
+                <div class="alert alert-info rounded-4 fw-bold mb-3">
+                    Pesanan ini sudah selesai diterima pelanggan. Data status, berat, dan pembayaran tidak bisa diubah lagi.
+                </div>
+            @endif
+
             <header class="admin-topbar">
                 <div>
                     <span class="admin-eyebrow">Detail Pesanan</span>
@@ -88,7 +95,9 @@
                             <h2>Data Pelanggan</h2>
                         </div>
 
-                        <span class="admin-badge process">{{ $order->status_label }}</span>
+                        <span class="admin-badge {{ $isLocked ? 'done' : 'process' }}">
+                            {{ $order->status_label }}
+                        </span>
                     </div>
 
                     <div class="admin-detail-grid">
@@ -211,46 +220,53 @@
                         </div>
                     </div>
 
-                    <div class="admin-action-stack">
-                        @if ($order->status === \App\Models\Order::STATUS_MENUNGGU_VERIFIKASI)
-                            <form method="POST" action="{{ route('admin.orders.approve', $order->order_code) }}">
+                    @if ($isLocked)
+                        <div class="admin-empty-box">
+                            <i class="bi bi-lock-fill"></i>
+                            <p>Pesanan sudah selesai diterima. Aksi pesanan tidak bisa diubah lagi.</p>
+                        </div>
+                    @else
+                        <div class="admin-action-stack">
+                            @if ($order->status === \App\Models\Order::STATUS_MENUNGGU_VERIFIKASI)
+                                <form method="POST" action="{{ route('admin.orders.approve', $order->order_code) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="admin-btn-primary w-100">
+                                        ACC Pesanan
+                                    </button>
+                                </form>
+
+                                <form method="POST" action="{{ route('admin.orders.reject', $order->order_code) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="admin-btn-danger w-100">
+                                        Tolak / Batalkan Pesanan
+                                    </button>
+                                </form>
+                            @endif
+
+                            <form method="POST" action="{{ route('admin.orders.status', $order->order_code) }}">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="admin-btn-primary w-100">
-                                    ACC Pesanan
+
+                                <label>Update Status</label>
+                                <select name="status">
+                                    <option value="menunggu_verifikasi" @selected($order->status === 'menunggu_verifikasi')>Menunggu Verifikasi</option>
+                                    <option value="dijemput" @selected($order->status === 'dijemput')>Dijemput</option>
+                                    <option value="diproses" @selected($order->status === 'diproses')>Diproses</option>
+                                    <option value="menunggu_pembayaran" @selected($order->status === 'menunggu_pembayaran')>Menunggu Pembayaran</option>
+                                    <option value="selesai" @selected($order->status === 'selesai')>Selesai</option>
+                                    <option value="diantar" @selected($order->status === 'diantar')>Diantar</option>
+                                    <option value="selesai_diterima" @selected($order->status === 'selesai_diterima')>Selesai Diterima</option>
+                                    <option value="dibatalkan" @selected($order->status === 'dibatalkan')>Dibatalkan</option>
+                                </select>
+
+                                <button type="submit" class="admin-btn-primary w-100 mt-2">
+                                    Simpan Status
                                 </button>
                             </form>
-
-                            <form method="POST" action="{{ route('admin.orders.reject', $order->order_code) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="admin-btn-danger w-100">
-                                    Tolak / Batalkan Pesanan
-                                </button>
-                            </form>
-                        @endif
-
-                        <form method="POST" action="{{ route('admin.orders.status', $order->order_code) }}">
-                            @csrf
-                            @method('PATCH')
-
-                            <label>Update Status</label>
-                            <select name="status">
-                                <option value="menunggu_verifikasi" @selected($order->status === 'menunggu_verifikasi')>Menunggu Verifikasi</option>
-                                <option value="dijemput" @selected($order->status === 'dijemput')>Dijemput</option>
-                                <option value="diproses" @selected($order->status === 'diproses')>Diproses</option>
-                                <option value="menunggu_pembayaran" @selected($order->status === 'menunggu_pembayaran')>Menunggu Pembayaran</option>
-                                <option value="selesai" @selected($order->status === 'selesai')>Selesai</option>
-                                <option value="diantar" @selected($order->status === 'diantar')>Diantar</option>
-                                <option value="selesai_diterima" @selected($order->status === 'selesai_diterima')>Selesai Diterima</option>
-                                <option value="dibatalkan" @selected($order->status === 'dibatalkan')>Dibatalkan</option>
-                            </select>
-
-                            <button type="submit" class="admin-btn-primary w-100 mt-2">
-                                Simpan Status
-                            </button>
-                        </form>
-                    </div>
+                        </div>
+                    @endif
                 </div>
 
                 <div id="weight" class="admin-panel">
@@ -261,26 +277,33 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('admin.orders.weight', $order->order_code) }}" class="admin-weight-form">
-                        @csrf
-                        @method('PATCH')
-
-                        <label>Berat Cucian</label>
-                        <div class="admin-input-group">
-                            <input
-                                type="number"
-                                name="weight"
-                                step="0.1"
-                                value="{{ old('weight', $order->weight) }}"
-                                placeholder="Contoh: 3.5"
-                            >
-                            <span>Kg</span>
+                    @if ($isLocked)
+                        <div class="admin-empty-box">
+                            <i class="bi bi-lock-fill"></i>
+                            <p>Berat cucian sudah dikunci karena pesanan selesai diterima.</p>
                         </div>
+                    @else
+                        <form method="POST" action="{{ route('admin.orders.weight', $order->order_code) }}" class="admin-weight-form">
+                            @csrf
+                            @method('PATCH')
 
-                        <button type="submit" class="admin-btn-primary w-100">
-                            Simpan Berat & Hitung Harga
-                        </button>
-                    </form>
+                            <label>Berat Cucian</label>
+                            <div class="admin-input-group">
+                                <input
+                                    type="number"
+                                    name="weight"
+                                    step="0.1"
+                                    value="{{ old('weight', $order->weight) }}"
+                                    placeholder="Contoh: 3.5"
+                                >
+                                <span>Kg</span>
+                            </div>
+
+                            <button type="submit" class="admin-btn-primary w-100">
+                                Simpan Berat & Hitung Harga
+                            </button>
+                        </form>
+                    @endif
                 </div>
 
                 <div id="payment" class="admin-panel">
@@ -291,7 +314,12 @@
                         </div>
                     </div>
 
-                    @if ($order->total_price > 0 && $order->payment_status === \App\Models\Order::PAYMENT_UNPAID)
+                    @if ($isLocked)
+                        <div class="admin-empty-box">
+                            <i class="bi bi-lock-fill"></i>
+                            <p>Pembayaran sudah dikunci karena pesanan selesai diterima.</p>
+                        </div>
+                    @elseif ($order->total_price > 0 && $order->payment_status === \App\Models\Order::PAYMENT_UNPAID)
                         <form method="POST" action="{{ route('admin.orders.cash-payment', $order->order_code) }}" class="admin-weight-form">
                             @csrf
 

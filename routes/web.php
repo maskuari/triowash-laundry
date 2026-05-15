@@ -30,6 +30,15 @@ Route::post('/periksa-pesanan', [TrackingController::class, 'search'])->name('tr
 // Admin Dashboard
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
 
+Route::patch('/admin/pesanan/terima-semua', [AdminController::class, 'approveAllIncomingOrders'])
+    ->name('admin.orders.approve-all');
+
+Route::delete('/admin/pesanan/tolak-semua', [AdminController::class, 'rejectAllIncomingOrders'])
+    ->name('admin.orders.reject-all');
+
+Route::patch('/admin/toko/status', [AdminController::class, 'updateStoreStatus'])
+    ->name('admin.store-status.update');
+
 Route::get('/admin/pesanan/{order:order_code}', [AdminController::class, 'showOrder'])
     ->name('admin.orders.show');
 
@@ -51,7 +60,7 @@ Route::post('/admin/pesanan/{order:order_code}/bayar-tunai', [AdminController::c
 Route::delete('/admin/pesanan/{order:order_code}', [AdminController::class, 'deleteOrder'])
     ->name('admin.orders.delete');
 
-// Admin Layanan & Wangi
+// Admin Layanan, Paket, Wangi
 Route::post('/admin/layanan', [AdminController::class, 'storeService'])
     ->name('admin.services.store');
 

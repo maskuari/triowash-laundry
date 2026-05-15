@@ -346,6 +346,56 @@
     font-weight: 700;
 }
 
+/* Desktop Timeline */
+@media (min-width: 992px) {
+    .tracking-timeline {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .tracking-step {
+        min-height: 132px;
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 0.6rem;
+        padding: 0.85rem;
+        border-radius: 18px;
+        background: #f8fafc;
+        opacity: 0.62;
+    }
+
+    .tracking-step.done,
+    .tracking-step.current {
+        opacity: 1;
+    }
+
+    .tracking-step.current {
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        background: #eff6ff;
+        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.10);
+    }
+
+    .tracking-step > i {
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+    }
+
+    .tracking-step strong {
+        font-size: 0.78rem;
+        line-height: 1.25;
+    }
+
+    .tracking-step span {
+        font-size: 0.68rem;
+        line-height: 1.35;
+    }
+}
+
 /* Payment */
 .tracking-payment {
     display: flex;
@@ -376,6 +426,14 @@
     background: var(--gradient);
     font-size: 0.8rem;
     font-weight: 900;
+}
+
+.tracking-payment-note {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
 }
 
 /* Empty */
@@ -410,6 +468,14 @@
     color: var(--muted);
     line-height: 1.6;
     font-weight: 600;
+}
+
+.tracking-error {
+    display: block;
+    margin-top: -0.35rem;
+    color: #dc2626;
+    font-size: 0.74rem;
+    font-weight: 800;
 }
 
 /* Tablet */
@@ -624,69 +690,4 @@
         border-radius: 12px;
         font-size: 0.68rem;
     }
-}
-
-@media (min-width: 992px) {
-    .tracking-timeline {
-        display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 0.65rem;
-        margin-bottom: 1rem;
-    }
-
-    .tracking-step {
-        min-height: 132px;
-        display: flex;
-        align-items: flex-start;
-        flex-direction: column;
-        justify-content: flex-start;
-        gap: 0.6rem;
-        padding: 0.85rem;
-        border-radius: 18px;
-        background: #f8fafc;
-        opacity: 0.62;
-    }
-
-    .tracking-step.done,
-    .tracking-step.current {
-        opacity: 1;
-    }
-
-    .tracking-step.current {
-        border: 1px solid rgba(37, 99, 235, 0.25);
-        background: #eff6ff;
-        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.10);
-    }
-
-    .tracking-step > i {
-        width: 38px;
-        height: 38px;
-        border-radius: 14px;
-    }
-
-    .tracking-step strong {
-        font-size: 0.78rem;
-        line-height: 1.25;
-    }
-
-    .tracking-step span {
-        font-size: 0.68rem;
-        line-height: 1.35;
-    }
-}
-
-.tracking-error {
-    display: block;
-    margin-top: -0.35rem;
-    color: #dc2626;
-    font-size: 0.74rem;
-    font-weight: 800;
-}
-
-.tracking-payment-note {
-    display: inline-flex;
-    align-items: center;
-    color: var(--muted);
-    font-size: 0.78rem;
-    font-weight: 800;
 }

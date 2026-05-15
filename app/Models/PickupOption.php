@@ -11,10 +11,12 @@ class PickupOption extends Model
         'name',
         'code',
         'description',
+        'price',
         'is_active',
     ];
 
     protected $casts = [
+        'price' => 'integer',
         'is_active' => 'boolean',
     ];
 

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initOrderSummary() {
     const watchedInputs = document.querySelectorAll(
-        '#customerName, #customerPhone, #serviceSelect, #fragranceSelect, #pickupSelect'
+        '#customerName, #customerPhone, #serviceSelect, #serviceTypeSelect, #fragranceSelect, #pickupSelect'
     );
 
     watchedInputs.forEach((input) => {
@@ -22,20 +22,29 @@ function updateOrderSummary() {
     const phone = document.getElementById('customerPhone')?.value.trim();
 
     const selectedService = getSelectedOption('serviceSelect');
+    const selectedServiceType = getSelectedOption('serviceTypeSelect');
     const selectedFragrance = getSelectedOption('fragranceSelect');
     const selectedPickup = getSelectedOption('pickupSelect');
 
     setText('summaryName', name || 'Belum diisi');
     setText('summaryPhone', phone || 'Belum diisi');
     setText('summaryService', selectedService?.dataset.displayName || selectedService?.dataset.name || '-');
+    setText('summaryServiceType', selectedServiceType?.dataset.name || '-');
     setText('summaryPerfume', selectedFragrance?.dataset.name || '-');
     setText('summaryDelivery', selectedPickup?.dataset.name || '-');
 
     const servicePrice = Number(selectedService?.dataset.price || 0);
+    const serviceTypePrice = Number(selectedServiceType?.dataset.price || 0);
     const fragrancePrice = Number(selectedFragrance?.dataset.price || 0);
-    const totalPerKg = servicePrice + fragrancePrice;
+    const pickupPrice = Number(selectedPickup?.dataset.price || 0);
 
-    setText('summaryPrice', formatRupiah(totalPerKg) + '/kg');
+    const totalPerKg = servicePrice + serviceTypePrice + fragrancePrice;
+
+    if (pickupPrice > 0) {
+        setText('summaryPrice', formatRupiah(totalPerKg) + '/kg + ' + formatRupiah(pickupPrice) + ' antar jemput');
+    } else {
+        setText('summaryPrice', formatRupiah(totalPerKg) + '/kg');
+    }
 }
 
 function getSelectedOption(selectId) {
@@ -236,12 +245,14 @@ async function updateLocation(lat, lng) {
     setValue('longitude', lng.toFixed(7));
     setValue('googleMapsLink', `https://www.google.com/maps?q=${lat},${lng}`);
 
+    setLoadingLocationPreview();
+
     try {
         const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`,
             {
                 headers: {
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                 },
             }
         );
@@ -250,10 +261,40 @@ async function updateLocation(lat, lng) {
         const address = data.address || {};
 
         const country = address.country || 'Indonesia';
-        const province = address.state || address.region || '-';
-        const city = address.city || address.town || address.county || address.municipality || '-';
-        const district = address.suburb || address.city_district || address.district || address.village || address.hamlet || '-';
-        const village = address.village || address.hamlet || address.neighbourhood || '-';
+
+        const province =
+            address.state ||
+            address.region ||
+            '-';
+
+        const city =
+            address.city ||
+            address.town ||
+            address.county ||
+            address.municipality ||
+            address.city_district ||
+            '-';
+
+        const district =
+            address.suburb ||
+            address.district ||
+            address.city_district ||
+            address.county ||
+            '-';
+
+        const village =
+            address.village ||
+            address.hamlet ||
+            address.neighbourhood ||
+            address.residential ||
+            address.quarter ||
+            address.suburb ||
+            address.city_district ||
+            address.district ||
+            address.road ||
+            address.pedestrian ||
+            address.footway ||
+            '-';
 
         setValue('country', country);
         setValue('province', province);
@@ -265,12 +306,26 @@ async function updateLocation(lat, lng) {
         setText('previewProvince', province);
         setText('previewCity', city);
         setText('previewDistrict', district);
+        setText('previewVillage', village);
     } catch (error) {
-        setText('previewCountry', 'Gagal membaca');
-        setText('previewProvince', 'Gagal membaca');
-        setText('previewCity', 'Gagal membaca');
-        setText('previewDistrict', 'Gagal membaca');
+        setFailedLocationPreview();
     }
+}
+
+function setLoadingLocationPreview() {
+    setText('previewCountry', 'Membaca...');
+    setText('previewProvince', 'Membaca...');
+    setText('previewCity', 'Membaca...');
+    setText('previewDistrict', 'Membaca...');
+    setText('previewVillage', 'Membaca...');
+}
+
+function setFailedLocationPreview() {
+    setText('previewCountry', 'Gagal membaca');
+    setText('previewProvince', 'Gagal membaca');
+    setText('previewCity', 'Gagal membaca');
+    setText('previewDistrict', 'Gagal membaca');
+    setText('previewVillage', 'Gagal membaca');
 }
 
 function setValue(id, value) {

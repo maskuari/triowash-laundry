@@ -12,7 +12,6 @@
 @endsection
 
 @section('content')
-    {{-- Order Page --}}
     <section class="order-page">
         <div class="order-orb order-orb-1"></div>
         <div class="order-orb order-orb-2"></div>
@@ -35,7 +34,6 @@
             </div>
 
             <div class="order-layout">
-                {{-- Form --}}
                 <form
                     class="order-form"
                     id="orderForm"
@@ -47,7 +45,6 @@
                 >
                     @csrf
 
-                    {{-- Data Pelanggan --}}
                     <div class="order-card">
                         <div class="order-card-header">
                             <div class="order-card-icon">
@@ -104,7 +101,6 @@
                         </div>
                     </div>
 
-                    {{-- Lokasi --}}
                     <div class="order-card">
                         <div class="order-card-header">
                             <div class="order-card-icon">
@@ -152,6 +148,11 @@
                                     <span>Kecamatan</span>
                                     <strong id="previewDistrict">Belum dipilih</strong>
                                 </div>
+
+                                <div>
+                                    <span>Desa/Kelurahan</span>
+                                    <strong id="previewVillage">Belum dipilih</strong>
+                                </div>
                             </div>
 
                             <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
@@ -165,7 +166,6 @@
                         </div>
                     </div>
 
-                    {{-- Pilihan Pesanan --}}
                     <div class="order-card">
                         <div class="order-card-header">
                             <div class="order-card-icon">
@@ -174,13 +174,21 @@
 
                             <div>
                                 <h2>Detail Pesanan</h2>
-                                <p>Pilih layanan, wangi, dan opsi antar jemput.</p>
+                                <p>Pilih paket, layanan, wangi, dan opsi antar jemput.</p>
                             </div>
+                        </div>
+
+                        <div class="order-alert mb-3">
+                            <i class="bi bi-info-circle"></i>
+                            <p>
+                                Pesanan antar jemput hanya diterima dari jam 08:00 sampai 17:00 WITA.
+                                Pesanan yang masuk lewat dari jam 17:00 akan ditolak.
+                            </p>
                         </div>
 
                         <div class="order-select-grid">
                             <div class="order-select-box">
-                                <label for="serviceSelect">Paket Layanan</label>
+                                <label for="serviceSelect">Paket</label>
                                 <div class="order-select">
                                     <i class="bi bi-basket3"></i>
                                     <select id="serviceSelect" name="service_id">
@@ -199,6 +207,33 @@
                                 </div>
                                 <small class="order-error">
                                     @error('service_id') {{ $message }} @enderror
+                                </small>
+                            </div>
+
+                            <div class="order-select-box">
+                                <label for="serviceTypeSelect">Layanan</label>
+                                <div class="order-select">
+                                    <i class="bi bi-lightning-charge"></i>
+                                    <select id="serviceTypeSelect" name="service_type_id">
+                                        @foreach ($serviceTypes as $serviceType)
+                                            <option
+                                                value="{{ $serviceType->id }}"
+                                                data-name="{{ $serviceType->service_name }}"
+                                                data-price="{{ $serviceType->price_per_kg }}"
+                                                @selected(old('service_type_id') == $serviceType->id)
+                                            >
+                                                {{ $serviceType->service_name }}
+                                                @if ($serviceType->price_per_kg > 0)
+                                                    - Rp{{ number_format($serviceType->price_per_kg, 0, ',', '.') }}/kg
+                                                @else
+                                                    - Gratis
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <small class="order-error">
+                                    @error('service_type_id') {{ $message }} @enderror
                                 </small>
                             </div>
 
@@ -231,7 +266,7 @@
                                 </small>
                             </div>
 
-                            <div class="order-select-box full">
+                            <div class="order-select-box">
                                 <label for="pickupSelect">Opsi Antar-Jemput</label>
                                 <div class="order-select">
                                     <i class="bi bi-truck"></i>
@@ -240,9 +275,15 @@
                                             <option
                                                 value="{{ $pickupOption->id }}"
                                                 data-name="{{ $pickupOption->name }}"
+                                                data-price="{{ $pickupOption->price ?? 0 }}"
                                                 @selected(old('pickup_option_id') == $pickupOption->id)
                                             >
                                                 {{ $pickupOption->name }}
+                                                @if (($pickupOption->price ?? 0) > 0)
+                                                    - Rp{{ number_format($pickupOption->price, 0, ',', '.') }}
+                                                @else
+                                                    - Gratis
+                                                @endif
                                             </option>
                                         @endforeach
                                     </select>
@@ -270,7 +311,6 @@
                     </button>
                 </form>
 
-                {{-- Summary --}}
                 <aside class="order-summary" data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
                     <div class="order-summary-card">
                         <div class="order-summary-header">
@@ -296,8 +336,13 @@
                             </div>
 
                             <div>
-                                <span>Layanan</span>
+                                <span>Paket</span>
                                 <strong id="summaryService">-</strong>
+                            </div>
+
+                            <div>
+                                <span>Layanan</span>
+                                <strong id="summaryServiceType">-</strong>
                             </div>
 
                             <div>
@@ -312,7 +357,7 @@
                         </div>
 
                         <div class="order-summary-price">
-                            <span>Estimasi harga per kg</span>
+                            <span>Estimasi harga</span>
                             <strong id="summaryPrice">Rp0/kg</strong>
                         </div>
 

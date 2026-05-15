@@ -10,11 +10,8 @@
     <section class="admin-page">
         <aside class="admin-sidebar">
             <a href="/admin" class="admin-brand">
-                <img
-                    src="{{ asset('assets/images/logo.png') }}"
-                    alt="Triowash"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
-                >
+                <img src="{{ asset('assets/images/logo.png') }}" alt="Triowash"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
                 <span>triowash</span>
             </a>
 
@@ -42,9 +39,19 @@
                     <small>{{ $stats['finished_orders'] ?? 0 }}</small>
                 </a>
 
-                <a href="#layanan" class="admin-menu-link">
+                <a href="#setting-toko" class="admin-menu-link">
+                    <i class="bi bi-shop"></i>
+                    <span>Setting Toko</span>
+                </a>
+
+                <a href="#paket-layanan" class="admin-menu-link">
                     <i class="bi bi-basket2-fill"></i>
-                    <span>Layanan</span>
+                    <span>Paket & Layanan</span>
+                </a>
+
+                <a href="#wangi" class="admin-menu-link">
+                    <i class="bi bi-stars"></i>
+                    <span>Wangi</span>
                 </a>
 
                 <a href="#pickup" class="admin-menu-link">
@@ -84,7 +91,7 @@
                 <div>
                     <span class="admin-eyebrow">Dashboard Admin</span>
                     <h1>Kelola Operasional Triowash</h1>
-                    <p>Pesanan dipisah berdasarkan status supaya data tidak menumpuk dalam satu daftar.</p>
+                    <p>Kelola pesanan, paket, layanan, wangi, antar jemput, dan status toko.</p>
                 </div>
             </header>
 
@@ -135,6 +142,7 @@
             </section>
 
             <section class="admin-content-list">
+                {{-- Pesanan Masuk --}}
                 <div id="masuk" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header admin-panel-header-search">
                         <div>
@@ -142,34 +150,47 @@
                             <h2>Pesanan Masuk</h2>
                         </div>
 
-                        <form method="GET" action="{{ route('admin.dashboard') }}" class="admin-section-search-form">
-                            <input type="hidden" name="search_diproses" value="{{ $searchDiproses ?? '' }}">
-                            <input type="hidden" name="search_selesai" value="{{ $searchSelesai ?? '' }}">
+                        <div class="admin-header-actions">
+                            <form method="POST" action="{{ route('admin.orders.approve-all') }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="admin-action success"
+                                    onclick="return confirm('Terima semua pesanan masuk?')">
+                                    Terima Semua
+                                </button>
+                            </form>
 
-                            <div class="admin-section-search">
-                                <i class="bi bi-search"></i>
-                                <input
-                                    type="text"
-                                    name="search_masuk"
-                                    placeholder="Cari kode, nama, nomor, layanan..."
-                                    value="{{ $searchMasuk ?? '' }}"
-                                >
-                            </div>
+                            <form method="POST" action="{{ route('admin.orders.reject-all') }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="admin-action danger"
+                                    onclick="return confirm('Tolak dan hapus semua pesanan masuk?')">
+                                    Tolak Semua
+                                </button>
+                            </form>
 
-                            <button type="submit" class="admin-btn-primary">Cari</button>
+                            <form method="GET" action="{{ route('admin.dashboard') }}" class="admin-section-search-form">
+                                <input type="hidden" name="search_diproses" value="{{ $searchDiproses ?? '' }}">
+                                <input type="hidden" name="search_selesai" value="{{ $searchSelesai ?? '' }}">
 
-                            @if (!empty($searchMasuk))
-                                <a
-                                    href="{{ route('admin.dashboard', [
+                                <div class="admin-section-search">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" name="search_masuk" placeholder="Cari kode, nama, nomor, layanan..."
+                                        value="{{ $searchMasuk ?? '' }}">
+                                </div>
+
+                                <button type="submit" class="admin-btn-primary">Cari</button>
+
+                                @if (!empty($searchMasuk))
+                                                            <a href="{{ route('admin.dashboard', [
                                         'search_diproses' => $searchDiproses ?? '',
                                         'search_selesai' => $searchSelesai ?? '',
-                                    ]) }}#masuk"
-                                    class="admin-btn-secondary text-decoration-none"
-                                >
-                                    Reset
-                                </a>
-                            @endif
-                        </form>
+                                    ]) }}#masuk" class="admin-btn-secondary text-decoration-none">
+                                                                Reset
+                                                            </a>
+                                @endif
+                            </form>
+                        </div>
                     </div>
 
                     <div class="admin-table-scroll">
@@ -191,13 +212,15 @@
                                     @forelse ($incomingOrders as $order)
                                         @php
                                             $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
+                                            $serviceType = $order->orderItems->firstWhere('service.category', 'layanan')?->service;
                                             $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
                                         @endphp
 
                                         <tr>
                                             <td>
                                                 <strong>{{ $order->order_code }}</strong>
-                                                <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
+                                                <small
+                                                    class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
                                             </td>
 
                                             <td>
@@ -209,12 +232,22 @@
 
                                             <td>
                                                 {{ $mainService?->service_name ?? '-' }}
+                                                @if ($serviceType)
+                                                    <small class="d-block text-muted">{{ $serviceType->service_name }}</small>
+                                                @endif
                                                 @if ($fragrance)
                                                     <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
                                                 @endif
                                             </td>
 
-                                            <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
+                                            <td>
+                                                {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
+                                                @if (($order->pickupOption?->price ?? 0) > 0)
+                                                    <small class="d-block text-muted">
+                                                        Rp{{ number_format($order->pickupOption->price, 0, ',', '.') }}
+                                                    </small>
+                                                @endif
+                                            </td>
 
                                             <td>
                                                 <span class="admin-badge warning">
@@ -223,27 +256,27 @@
                                             </td>
 
                                             <td>
-                                                <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
+                                                <span
+                                                    class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
                                                     {{ $order->payment_status_label }}
                                                 </span>
                                             </td>
 
                                             <td>
                                                 <div class="admin-table-actions">
-                                                    <form method="POST" action="{{ route('admin.orders.approve', $order->order_code) }}">
+                                                    <form method="POST"
+                                                        action="{{ route('admin.orders.approve', $order->order_code) }}">
                                                         @csrf
                                                         @method('PATCH')
                                                         <button class="admin-action success" type="submit">ACC</button>
                                                     </form>
 
-                                                    <form method="POST" action="{{ route('admin.orders.reject', $order->order_code) }}">
+                                                    <form method="POST"
+                                                        action="{{ route('admin.orders.reject', $order->order_code) }}">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button
-                                                            class="admin-action danger"
-                                                            type="submit"
-                                                            onclick="return confirm('Tolak pesanan ini? Pesanan akan otomatis terhapus.')"
-                                                        >
+                                                        <button class="admin-action danger" type="submit"
+                                                            onclick="return confirm('Tolak pesanan ini? Pesanan akan otomatis terhapus.')">
                                                             Tolak
                                                         </button>
                                                     </form>
@@ -265,6 +298,7 @@
                     <p class="admin-table-note">Jika data lebih dari 10 baris, tabel bisa discroll.</p>
                 </div>
 
+                {{-- Pesanan Diproses --}}
                 <div id="diproses" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header admin-panel-header-search">
                         <div>
@@ -278,26 +312,19 @@
 
                             <div class="admin-section-search">
                                 <i class="bi bi-search"></i>
-                                <input
-                                    type="text"
-                                    name="search_diproses"
-                                    placeholder="Cari kode, nama, nomor, layanan..."
-                                    value="{{ $searchDiproses ?? '' }}"
-                                >
+                                <input type="text" name="search_diproses" placeholder="Cari kode, nama, nomor, layanan..."
+                                    value="{{ $searchDiproses ?? '' }}">
                             </div>
 
                             <button type="submit" class="admin-btn-primary">Cari</button>
 
                             @if (!empty($searchDiproses))
-                                <a
-                                    href="{{ route('admin.dashboard', [
-                                        'search_masuk' => $searchMasuk ?? '',
-                                        'search_selesai' => $searchSelesai ?? '',
-                                    ]) }}#diproses"
-                                    class="admin-btn-secondary text-decoration-none"
-                                >
-                                    Reset
-                                </a>
+                                                    <a href="{{ route('admin.dashboard', [
+                                    'search_masuk' => $searchMasuk ?? '',
+                                    'search_selesai' => $searchSelesai ?? '',
+                                ]) }}#diproses" class="admin-btn-secondary text-decoration-none">
+                                                        Reset
+                                                    </a>
                             @endif
                         </form>
                     </div>
@@ -321,13 +348,15 @@
                                     @forelse ($processedOrders as $order)
                                         @php
                                             $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
+                                            $serviceType = $order->orderItems->firstWhere('service.category', 'layanan')?->service;
                                             $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
                                         @endphp
 
                                         <tr>
                                             <td>
                                                 <strong>{{ $order->order_code }}</strong>
-                                                <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
+                                                <small
+                                                    class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
                                             </td>
 
                                             <td>
@@ -339,12 +368,22 @@
 
                                             <td>
                                                 {{ $mainService?->service_name ?? '-' }}
+                                                @if ($serviceType)
+                                                    <small class="d-block text-muted">{{ $serviceType->service_name }}</small>
+                                                @endif
                                                 @if ($fragrance)
                                                     <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
                                                 @endif
                                             </td>
 
-                                            <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
+                                            <td>
+                                                {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
+                                                @if (($order->pickupOption?->price ?? 0) > 0)
+                                                    <small class="d-block text-muted">
+                                                        Rp{{ number_format($order->pickupOption->price, 0, ',', '.') }}
+                                                    </small>
+                                                @endif
+                                            </td>
 
                                             <td>
                                                 <span class="admin-badge process">
@@ -353,13 +392,15 @@
                                             </td>
 
                                             <td>
-                                                <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
+                                                <span
+                                                    class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
                                                     {{ $order->payment_status_label }}
                                                 </span>
                                             </td>
 
                                             <td>
-                                                <a href="{{ route('admin.orders.show', $order->order_code) }}" class="admin-action primary text-decoration-none">
+                                                <a href="{{ route('admin.orders.show', $order->order_code) }}"
+                                                    class="admin-action primary text-decoration-none">
                                                     Detail
                                                 </a>
                                             </td>
@@ -379,6 +420,7 @@
                     <p class="admin-table-note">Jika data lebih dari 10 baris, tabel bisa discroll.</p>
                 </div>
 
+                {{-- Pesanan Selesai --}}
                 <div id="selesai" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header admin-panel-header-search">
                         <div>
@@ -392,26 +434,19 @@
 
                             <div class="admin-section-search">
                                 <i class="bi bi-search"></i>
-                                <input
-                                    type="text"
-                                    name="search_selesai"
-                                    placeholder="Cari kode, nama, nomor, layanan..."
-                                    value="{{ $searchSelesai ?? '' }}"
-                                >
+                                <input type="text" name="search_selesai" placeholder="Cari kode, nama, nomor, layanan..."
+                                    value="{{ $searchSelesai ?? '' }}">
                             </div>
 
                             <button type="submit" class="admin-btn-primary">Cari</button>
 
                             @if (!empty($searchSelesai))
-                                <a
-                                    href="{{ route('admin.dashboard', [
-                                        'search_masuk' => $searchMasuk ?? '',
-                                        'search_diproses' => $searchDiproses ?? '',
-                                    ]) }}#selesai"
-                                    class="admin-btn-secondary text-decoration-none"
-                                >
-                                    Reset
-                                </a>
+                                                    <a href="{{ route('admin.dashboard', [
+                                    'search_masuk' => $searchMasuk ?? '',
+                                    'search_diproses' => $searchDiproses ?? '',
+                                ]) }}#selesai" class="admin-btn-secondary text-decoration-none">
+                                                        Reset
+                                                    </a>
                             @endif
                         </form>
                     </div>
@@ -435,13 +470,15 @@
                                     @forelse ($finishedOrders as $order)
                                         @php
                                             $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
+                                            $serviceType = $order->orderItems->firstWhere('service.category', 'layanan')?->service;
                                             $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
                                         @endphp
 
                                         <tr>
                                             <td>
                                                 <strong>{{ $order->order_code }}</strong>
-                                                <small class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
+                                                <small
+                                                    class="d-block text-muted">{{ $order->created_at->format('d M Y') }}</small>
                                             </td>
 
                                             <td>
@@ -453,12 +490,22 @@
 
                                             <td>
                                                 {{ $mainService?->service_name ?? '-' }}
+                                                @if ($serviceType)
+                                                    <small class="d-block text-muted">{{ $serviceType->service_name }}</small>
+                                                @endif
                                                 @if ($fragrance)
                                                     <small class="d-block text-muted">{{ $fragrance->service_name }}</small>
                                                 @endif
                                             </td>
 
-                                            <td>{{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}</td>
+                                            <td>
+                                                {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
+                                                @if (($order->pickupOption?->price ?? 0) > 0)
+                                                    <small class="d-block text-muted">
+                                                        Rp{{ number_format($order->pickupOption->price, 0, ',', '.') }}
+                                                    </small>
+                                                @endif
+                                            </td>
 
                                             <td>
                                                 <span class="admin-badge done">
@@ -467,25 +514,25 @@
                                             </td>
 
                                             <td>
-                                                <span class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
+                                                <span
+                                                    class="admin-badge {{ $order->payment_status === 'paid' ? 'done' : 'warning' }}">
                                                     {{ $order->payment_status_label }}
                                                 </span>
                                             </td>
 
                                             <td>
                                                 <div class="admin-table-actions">
-                                                    <a href="{{ route('admin.orders.show', $order->order_code) }}" class="admin-action primary text-decoration-none">
+                                                    <a href="{{ route('admin.orders.show', $order->order_code) }}"
+                                                        class="admin-action primary text-decoration-none">
                                                         Detail
                                                     </a>
 
-                                                    <form method="POST" action="{{ route('admin.orders.delete', $order->order_code) }}">
+                                                    <form method="POST"
+                                                        action="{{ route('admin.orders.delete', $order->order_code) }}">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button
-                                                            class="admin-action danger"
-                                                            type="submit"
-                                                            onclick="return confirm('Hapus data pesanan selesai ini?')"
-                                                        >
+                                                        <button class="admin-action danger" type="submit"
+                                                            onclick="return confirm('Hapus data pesanan selesai ini?')">
                                                             Hapus
                                                         </button>
                                                     </form>
@@ -507,11 +554,75 @@
                     <p class="admin-table-note">Jika data lebih dari 10 baris, tabel bisa discroll.</p>
                 </div>
 
-                <div id="layanan" class="admin-panel admin-panel-full">
+                {{-- Setting Toko --}}
+                <div id="setting-toko" class="admin-panel admin-panel-full">
+                    <div class="admin-panel-header">
+                        <div>
+                            <span>Store</span>
+                            <h2>Status Toko</h2>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.store-status.update') }}" class="admin-setting-form">
+                        @csrf
+                        @method('PATCH')
+
+                        <div>
+                            <label>Status Laundry</label>
+                            <select name="is_open">
+                                <option value="1" @selected($storeStatus?->is_open)>Buka</option>
+                                <option value="0" @selected(!$storeStatus?->is_open)>Tutup</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Catatan Status</label>
+                            <select name="status_note">
+                                <option value="Kami siap melayani Anda."
+                                    @selected($storeStatus?->status_note === 'Kami siap melayani Anda.')>
+                                    Kami siap melayani Anda.
+                                </option>
+
+                                <option value="Kami akan buka kembali besok hari."
+                                    @selected($storeStatus?->status_note === 'Kami akan buka kembali besok hari.')>
+                                    Kami akan buka kembali besok hari.
+                                </option>
+
+                                <option value="Kami akan buka kembali dalam waktu dekat."
+                                    @selected($storeStatus?->status_note === 'Kami akan buka kembali dalam waktu dekat.')>
+                                    Kami akan buka kembali dalam waktu dekat.
+                                </option>
+
+                                <option value="Kami akan buka kembali lusa." @selected($storeStatus?->status_note === 'Kami akan buka kembali lusa.')>
+                                    Kami akan buka kembali lusa.
+                                </option>
+
+                                <option value="Layanan sedang ditutup sementara karena ada penyesuaian operasional."
+                                    @selected($storeStatus?->status_note === 'Layanan sedang ditutup sementara karena ada penyesuaian operasional.')>
+                                    Layanan sedang ditutup sementara karena ada penyesuaian operasional.
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="admin-empty-box admin-setting-full">
+                            <i class="bi bi-info-circle"></i>
+                            <p>
+                                Jam antar jemput: 08:00 - 17:00 WITA. Laundry buka: 07:00 - 21:30 WITA.
+                            </p>
+                        </div>
+
+                        <button type="submit" class="admin-btn-primary">
+                            Simpan Status Toko
+                        </button>
+                    </form>
+                </div>
+
+                {{-- Paket & Layanan --}}
+                <div id="paket-layanan" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header">
                         <div>
                             <span>Services</span>
-                            <h2>Kelola Layanan & Wangi</h2>
+                            <h2>Kelola Paket & Layanan</h2>
                         </div>
                     </div>
 
@@ -519,15 +630,15 @@
                         @csrf
 
                         <div>
-                            <label>Nama Layanan/Wangi</label>
-                            <input type="text" name="service_name" placeholder="Contoh: Cuci Komplit">
+                            <label>Nama Paket/Layanan</label>
+                            <input type="text" name="service_name" placeholder="Contoh: Lipat Saja / Express">
                         </div>
 
                         <div>
                             <label>Kategori</label>
                             <select name="category">
-                                <option value="paket">Paket Layanan</option>
-                                <option value="wangi">Pilihan Wangi</option>
+                                <option value="paket">Paket</option>
+                                <option value="layanan">Layanan</option>
                             </select>
                         </div>
 
@@ -541,30 +652,165 @@
                         </button>
                     </form>
 
-                    <div class="admin-service-list">
-                        @foreach ($services as $service)
-                            <div class="admin-service-item">
-                                <div class="admin-service-icon">
-                                    <i class="bi {{ $service->category === 'paket' ? 'bi-basket3' : 'bi-stars' }}"></i>
-                                </div>
+                    <div class="admin-manage-grid">
+                        <div class="admin-manage-card">
+                            <h3>Paket</h3>
 
-                                <div>
-                                    <strong>{{ $service->service_name }}</strong>
-                                    <span>{{ ucfirst($service->category) }} • Rp{{ number_format($service->price_per_kg, 0, ',', '.') }}/kg</span>
-                                </div>
+                            <div class="admin-simple-list">
+                                @forelse ($packages as $service)
+                                    <div class="admin-simple-row">
+                                        <div class="admin-service-icon">
+                                            <i class="bi {{ $service->icon_class }}"></i>
+                                        </div>
 
-                                <form method="POST" action="{{ route('admin.services.delete', $service->id) }}" class="ms-auto">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Hapus layanan ini?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                        <div class="admin-simple-row-info">
+                                            <strong>{{ $service->service_name }}</strong>
+                                            <span>{{ $service->category_label }} •
+                                                Rp{{ number_format($service->price_per_kg, 0, ',', '.') }}/kg</span>
+                                        </div>
+
+                                        <button type="button" class="admin-action primary" onclick="openServiceModal(
+                                                        '{{ $service->id }}',
+                                                        '{{ addslashes($service->service_name) }}',
+                                                        '{{ $service->category }}',
+                                                        '{{ $service->price_per_kg }}'
+                                                    )">
+                                            Edit
+                                        </button>
+
+                                        <form method="POST" action="{{ route('admin.services.delete', $service->id) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="admin-action danger" type="submit"
+                                                onclick="return confirm('Hapus data ini?')">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                @empty
+                                    <div class="admin-empty-box">
+                                        <i class="bi bi-info-circle"></i>
+                                        <p>Belum ada data paket.</p>
+                                    </div>
+                                @endforelse
                             </div>
-                        @endforeach
+                        </div>
+
+                        <div class="admin-manage-card">
+                            <h3>Layanan</h3>
+
+                            <div class="admin-simple-list">
+                                @forelse ($serviceTypes as $service)
+                                    <div class="admin-simple-row">
+                                        <div class="admin-service-icon">
+                                            <i class="bi {{ $service->icon_class }}"></i>
+                                        </div>
+
+                                        <div class="admin-simple-row-info">
+                                            <strong>{{ $service->service_name }}</strong>
+                                            <span>{{ $service->category_label }} •
+                                                Rp{{ number_format($service->price_per_kg, 0, ',', '.') }}/kg</span>
+                                        </div>
+
+                                        <button type="button" class="admin-action primary" onclick="openServiceModal(
+                                                        '{{ $service->id }}',
+                                                        '{{ addslashes($service->service_name) }}',
+                                                        '{{ $service->category }}',
+                                                        '{{ $service->price_per_kg }}'
+                                                    )">
+                                            Edit
+                                        </button>
+
+                                        <form method="POST" action="{{ route('admin.services.delete', $service->id) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="admin-action danger" type="submit"
+                                                onclick="return confirm('Hapus data ini?')">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                @empty
+                                    <div class="admin-empty-box">
+                                        <i class="bi bi-info-circle"></i>
+                                        <p>Belum ada data layanan.</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                {{-- Wangi --}}
+                <div id="wangi" class="admin-panel admin-panel-full">
+                    <div class="admin-panel-header">
+                        <div>
+                            <span>Fragrance</span>
+                            <h2>Kelola Wangi</h2>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.services.store') }}" class="admin-setting-form mb-4">
+                        @csrf
+
+                        <input type="hidden" name="category" value="wangi">
+
+                        <div>
+                            <label>Nama Wangi</label>
+                            <input type="text" name="service_name" placeholder="Contoh: Wangi Bunga">
+                        </div>
+
+                        <div>
+                            <label>Harga per Kg</label>
+                            <input type="number" name="price_per_kg" placeholder="Contoh: 1000" value="0">
+                        </div>
+
+                        <button type="submit" class="admin-btn-primary">
+                            Tambah Wangi
+                        </button>
+                    </form>
+
+                    <div class="admin-simple-list">
+                        @forelse ($fragrances as $service)
+                            <div class="admin-simple-row">
+                                <div class="admin-service-icon">
+                                    <i class="bi {{ $service->icon_class }}"></i>
+                                </div>
+
+                                <div class="admin-simple-row-info">
+                                    <strong>{{ $service->service_name }}</strong>
+                                    <span>{{ $service->category_label }} •
+                                        Rp{{ number_format($service->price_per_kg, 0, ',', '.') }}/kg</span>
+                                </div>
+
+                                <button type="button" class="admin-action primary" onclick="openServiceModal(
+                                                '{{ $service->id }}',
+                                                '{{ addslashes($service->service_name) }}',
+                                                '{{ $service->category }}',
+                                                '{{ $service->price_per_kg }}'
+                                            )">
+                                    Edit
+                                </button>
+
+                                <form method="POST" action="{{ route('admin.services.delete', $service->id) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="admin-action danger" type="submit"
+                                        onclick="return confirm('Hapus data ini?')">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        @empty
+                            <div class="admin-empty-box">
+                                <i class="bi bi-info-circle"></i>
+                                <p>Belum ada pilihan wangi.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- Pickup --}}
                 <div id="pickup" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header">
                         <div>
@@ -586,9 +832,9 @@
                             <input type="text" name="code" placeholder="Contoh: dijemput_antar">
                         </div>
 
-                        <div class="admin-setting-full">
-                            <label>Deskripsi</label>
-                            <textarea name="description" placeholder="Deskripsi opsi antar jemput"></textarea>
+                        <div>
+                            <label>Harga Antar Jemput</label>
+                            <input type="number" name="price" placeholder="Contoh: 5000" value="0">
                         </div>
 
                         <div>
@@ -599,35 +845,207 @@
                             </select>
                         </div>
 
+                        <div class="admin-setting-full">
+                            <label>Deskripsi</label>
+                            <textarea name="description" placeholder="Deskripsi opsi antar jemput"></textarea>
+                        </div>
+
                         <button type="submit" class="admin-btn-primary">
                             Tambah Opsi
                         </button>
                     </form>
 
-                    <div class="admin-service-list">
-                        @foreach ($pickupOptions as $option)
-                            <div class="admin-service-item">
+                    <div class="admin-simple-list">
+                        @forelse ($pickupOptions as $option)
+                            <div class="admin-simple-row">
                                 <div class="admin-service-icon">
                                     <i class="bi bi-truck"></i>
                                 </div>
 
-                                <div>
+                                <div class="admin-simple-row-info">
                                     <strong>{{ $option->name }}</strong>
-                                    <span>{{ $option->code }} • {{ $option->is_active ? 'Aktif' : 'Nonaktif' }}</span>
+                                    <span>
+                                        {{ $option->code }}
+                                        • {{ $option->is_active ? 'Aktif' : 'Nonaktif' }}
+                                        • Rp{{ number_format($option->price ?? 0, 0, ',', '.') }}
+                                    </span>
                                 </div>
 
-                                <form method="POST" action="{{ route('admin.pickup-options.delete', $option->id) }}" class="ms-auto">
+                                <button type="button" class="admin-action primary" onclick="openPickupModal(
+                                                '{{ $option->id }}',
+                                                '{{ addslashes($option->name) }}',
+                                                '{{ addslashes($option->code) }}',
+                                                '{{ $option->price ?? 0 }}',
+                                                '{{ $option->is_active ? 1 : 0 }}',
+                                                '{{ addslashes($option->description ?? '') }}'
+                                            )">
+                                    Edit
+                                </button>
+
+                                <form method="POST" action="{{ route('admin.pickup-options.delete', $option->id) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Hapus opsi ini?')">
-                                        <i class="bi bi-trash"></i>
+                                    <button class="admin-action danger" type="submit"
+                                        onclick="return confirm('Hapus opsi ini?')">
+                                        Hapus
                                     </button>
                                 </form>
                             </div>
-                        @endforeach
+                        @empty
+                            <div class="admin-empty-box">
+                                <i class="bi bi-info-circle"></i>
+                                <p>Belum ada opsi antar jemput.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </section>
         </main>
     </section>
+
+    {{-- Modal Edit Service --}}
+    <div class="admin-modal" id="serviceEditModal">
+        <div class="admin-modal-backdrop" onclick="closeServiceModal()"></div>
+
+        <div class="admin-modal-card">
+            <div class="admin-modal-header">
+                <div>
+                    <span>Edit Data</span>
+                    <h3>Edit Paket / Layanan / Wangi</h3>
+                </div>
+
+                <button type="button" onclick="closeServiceModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="serviceEditForm" class="admin-setting-form">
+                @csrf
+                @method('PATCH')
+
+                <div>
+                    <label>Nama</label>
+                    <input type="text" name="service_name" id="editServiceName">
+                </div>
+
+                <div>
+                    <label>Kategori</label>
+                    <select name="category" id="editServiceCategory">
+                        <option value="paket">Paket</option>
+                        <option value="layanan">Layanan</option>
+                        <option value="wangi">Wangi</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Harga per Kg</label>
+                    <input type="number" name="price_per_kg" id="editServicePrice">
+                </div>
+
+                <button type="submit" class="admin-btn-primary">
+                    Simpan Perubahan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modal Edit Pickup --}}
+    <div class="admin-modal" id="pickupEditModal">
+        <div class="admin-modal-backdrop" onclick="closePickupModal()"></div>
+
+        <div class="admin-modal-card">
+            <div class="admin-modal-header">
+                <div>
+                    <span>Edit Opsi</span>
+                    <h3>Edit Antar Jemput</h3>
+                </div>
+
+                <button type="button" onclick="closePickupModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="pickupEditForm" class="admin-setting-form">
+                @csrf
+                @method('PATCH')
+
+                <div>
+                    <label>Nama Opsi</label>
+                    <input type="text" name="name" id="editPickupName">
+                </div>
+
+                <div>
+                    <label>Kode</label>
+                    <input type="text" name="code" id="editPickupCode">
+                </div>
+
+                <div>
+                    <label>Harga</label>
+                    <input type="number" name="price" id="editPickupPrice">
+                </div>
+
+                <div>
+                    <label>Status</label>
+                    <select name="is_active" id="editPickupStatus">
+                        <option value="1">Aktif</option>
+                        <option value="0">Nonaktif</option>
+                    </select>
+                </div>
+
+                <div class="admin-setting-full">
+                    <label>Deskripsi</label>
+                    <textarea name="description" id="editPickupDescription"></textarea>
+                </div>
+
+                <button type="submit" class="admin-btn-primary">
+                    Simpan Perubahan
+                </button>
+            </form>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script>
+        function openServiceModal(id, name, category, price) {
+            const modal = document.getElementById('serviceEditModal');
+            const form = document.getElementById('serviceEditForm');
+
+            form.action = `/admin/layanan/${id}`;
+            document.getElementById('editServiceName').value = name;
+            document.getElementById('editServiceCategory').value = category;
+            document.getElementById('editServicePrice').value = price;
+
+            modal.classList.add('show');
+        }
+
+        function closeServiceModal() {
+            document.getElementById('serviceEditModal').classList.remove('show');
+        }
+
+        function openPickupModal(id, name, code, price, isActive, description) {
+            const modal = document.getElementById('pickupEditModal');
+            const form = document.getElementById('pickupEditForm');
+
+            form.action = `/admin/opsi-antar-jemput/${id}`;
+            document.getElementById('editPickupName').value = name;
+            document.getElementById('editPickupCode').value = code;
+            document.getElementById('editPickupPrice').value = price;
+            document.getElementById('editPickupStatus').value = String(isActive);
+            document.getElementById('editPickupDescription').value = description || '';
+
+            modal.classList.add('show');
+        }
+
+        function closePickupModal() {
+            document.getElementById('pickupEditModal').classList.remove('show');
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeServiceModal();
+                closePickupModal();
+            }
+        });
+    </script>
 @endsection
