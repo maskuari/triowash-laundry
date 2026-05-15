@@ -18,13 +18,16 @@
                     <div class="home-hero-content">
                         <div class="home-hero-badge">
                             <i class="bi bi-stars"></i>
-                            Promo Member Baru: Diskon 10%
+                            Laundry praktis tanpa akun
                         </div>
 
                         {{-- Mobile Image --}}
                         <div class="home-mobile-visual">
-                            <img src="{{ asset('assets/images/baju.png') }}" alt="Triowash Laundry Service"
-                                class="home-hero-image">
+                            <img
+                                src="{{ asset('assets/images/baju.png') }}"
+                                alt="Triowash Laundry Service"
+                                class="home-hero-image"
+                            >
                         </div>
 
                         <h1 class="home-hero-title">
@@ -33,10 +36,22 @@
                         </h1>
 
                         <p class="home-hero-description">
-                            Antar jemput gratis untuk wilayah Banjarmasin. Cuci bersih, wangi, dan rapi tanpa perlu keluar
-                            rumah.
+                            Antar jemput gratis untuk wilayah Banjarmasin.
+                            Cuci bersih, wangi, dan rapi tanpa perlu keluar rumah.
                             Sistem bayar di akhir yang aman dan transparan.
                         </p>
+
+                        <div class="home-store-status">
+                            <div class="home-store-status-dot {{ $storeStatus?->is_open ? 'open' : 'closed' }}"></div>
+                            <span>
+                                Toko {{ $storeStatus?->label ?? 'Buka' }}
+                                @if ($storeStatus?->status_note)
+                                    • {{ $storeStatus->status_note }}
+                                @else
+                                    • 08.00 - 21.00 WITA
+                                @endif
+                            </span>
+                        </div>
 
                         <div class="home-hero-actions">
                             <a href="/pesan" class="btn btn-primary btn-hero shadow-primary">
@@ -59,14 +74,14 @@
 
                             <div class="home-stat-card">
                                 <i class="bi bi-grid-1x2 home-stat-icon home-stat-icon-blue"></i>
-                                <strong>3+</strong>
+                                <strong>{{ $services->count() }}+</strong>
                                 <span>Pilihan Layanan</span>
                             </div>
 
                             <div class="home-stat-card">
-                                <i class="bi bi-lightning-charge home-stat-icon home-stat-icon-purple"></i>
-                                <strong>Fast</strong>
-                                <span>Proses Cepat</span>
+                                <i class="bi bi-bag-check home-stat-icon home-stat-icon-purple"></i>
+                                <strong>{{ $orderStats['total_orders'] }}</strong>
+                                <span>Total Pesanan</span>
                             </div>
                         </div>
                     </div>
@@ -77,8 +92,11 @@
                     <div class="home-visual">
                         <div class="home-visual-glow"></div>
 
-                        <img src="{{ asset('assets/images/baju.png') }}" alt="Triowash Laundry Service"
-                            class="home-hero-image">
+                        <img
+                            src="{{ asset('assets/images/baju.png') }}"
+                            alt="Triowash Laundry Service"
+                            class="home-hero-image"
+                        >
 
                         <div class="home-floating-card">
                             <div class="home-floating-icon">
@@ -97,43 +115,33 @@
     </section>
 
     {{-- Layanan --}}
-    {{-- Layanan --}}
     <section id="layanan" class="section-padding home-services">
         <div class="container">
             <div class="home-services-preview">
                 <div class="home-services-list" data-aos="fade-right" data-aos-duration="900">
-                    <div class="home-service-mini-card">
-                        <div class="home-service-mini-icon">
-                            <i class="bi bi-basket3"></i>
-                        </div>
+                    @forelse ($services as $service)
+                        <div class="home-service-mini-card">
+                            <div class="home-service-mini-icon">
+                                <i class="bi bi-basket3"></i>
+                            </div>
 
-                        <div>
-                            <h5>Cuci Komplit</h5>
-                            <p>Cuci, kering, setrika, dan lipat rapi.</p>
+                            <div>
+                                <h5>{{ $service->service_name }}</h5>
+                                <p>Mulai dari Rp{{ number_format($service->price_per_kg, 0, ',', '.') }}/kg.</p>
+                            </div>
                         </div>
-                    </div>
+                    @empty
+                        <div class="home-service-mini-card">
+                            <div class="home-service-mini-icon">
+                                <i class="bi bi-info-circle"></i>
+                            </div>
 
-                    <div class="home-service-mini-card">
-                        <div class="home-service-mini-icon">
-                            <i class="bi bi-wind"></i>
+                            <div>
+                                <h5>Belum ada layanan</h5>
+                                <p>Data layanan akan tampil setelah admin menambahkan layanan.</p>
+                            </div>
                         </div>
-
-                        <div>
-                            <h5>Cuci Kering</h5>
-                            <p>Pakaian bersih dan kering tanpa setrika.</p>
-                        </div>
-                    </div>
-
-                    <div class="home-service-mini-card">
-                        <div class="home-service-mini-icon">
-                            <i class="bi bi-lightning-charge"></i>
-                        </div>
-
-                        <div>
-                            <h5>Setrika Saja</h5>
-                            <p>Pakaian dirapikan agar siap dipakai.</p>
-                        </div>
-                    </div>
+                    @endforelse
                 </div>
 
                 <div class="home-services-content" data-aos="fade-left" data-aos-duration="900">
@@ -216,4 +224,48 @@
             </div>
         </div>
     </section>
+
+    {{-- Testimoni --}}
+    @if ($testimonials->isNotEmpty())
+        <section class="section-padding home-testimonials">
+            <div class="container">
+                <div class="section-heading text-center" data-aos="fade-up">
+                    <span class="section-eyebrow">
+                        <i class="bi bi-chat-heart"></i>
+                        Testimoni
+                    </span>
+
+                    <h2>
+                        Kata pelanggan
+                        <span>tentang Triowash.</span>
+                    </h2>
+
+                    <p>
+                        Beberapa pengalaman pelanggan yang sudah menggunakan layanan Triowash Laundry.
+                    </p>
+                </div>
+
+                <div class="row g-4 mt-4">
+                    @foreach ($testimonials as $testimonial)
+                        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
+                            <div class="home-testimonial-card">
+                                <div class="home-testimonial-stars">
+                                    @for ($i = 1; $i <= $testimonial->rating; $i++)
+                                        <i class="bi bi-star-fill"></i>
+                                    @endfor
+                                </div>
+
+                                <p>"{{ $testimonial->message }}"</p>
+
+                                <div>
+                                    <strong>{{ $testimonial->customer_name }}</strong>
+                                    <span>{{ $testimonial->customer_role ?? 'Pelanggan Triowash' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 @endsection

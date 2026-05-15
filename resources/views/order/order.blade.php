@@ -3,6 +3,7 @@
 @section('title', 'Pesan Laundry')
 
 @section('styles')
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     <link href="{{ asset('css/order.css') }}" rel="stylesheet">
 @endsection
 
@@ -25,7 +26,7 @@
                 </h1>
 
                 <p>
-                    Isi data singkat, pilih layanan, lalu pesanan akan masuk ke admin Triowash untuk dikonfirmasi.
+                    Isi data singkat, pilih layanan, tentukan lokasi, lalu pesanan akan masuk ke admin Triowash.
                 </p>
             </div>
 
@@ -35,7 +36,8 @@
                     class="order-form"
                     id="orderForm"
                     method="POST"
-                    action="/pesan"
+                    action="{{ route('order.store') }}"
+                    data-backend-ready="true"
                     data-aos="fade-right"
                     data-aos-duration="900"
                 >
@@ -84,32 +86,78 @@
                             </div>
 
                             <div class="order-field full">
-                                <label for="customerAddress">Alamat Lengkap</label>
+                                <label for="addressDetail">Detail Alamat</label>
                                 <textarea
-                                    id="customerAddress"
+                                    id="addressDetail"
                                     name="address"
                                     rows="3"
-                                    placeholder="Contoh: Jl. Merpati No. 12, Banjarmasin"
+                                    placeholder="Contoh: Jl. Merpati No. 12, RT 05/RW 02, rumah pagar putih"
                                 >{{ old('address') }}</textarea>
-                                <small class="order-error" data-error="customerAddress">
+                                <small class="order-error" data-error="addressDetail">
                                     @error('address') {{ $message }} @enderror
                                 </small>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="order-field full">
-                                <label for="googleMapsLink">
-                                    Link Google Maps
-                                    <span>opsional</span>
-                                </label>
-                                <input
-                                    type="url"
-                                    id="googleMapsLink"
-                                    name="google_maps"
-                                    placeholder="https://maps.app.goo.gl/..."
-                                    value="{{ old('google_maps') }}"
-                                >
-                                <small class="order-hint">Link Maps membantu kurir menemukan alamat lebih cepat.</small>
+                    {{-- Lokasi --}}
+                    <div class="order-card">
+                        <div class="order-card-header">
+                            <div class="order-card-icon">
+                                <i class="bi bi-geo-alt"></i>
                             </div>
+
+                            <div>
+                                <h2>Lokasi Pelanggan</h2>
+                                <p>Klik peta atau gunakan lokasi saya agar kurir mudah menemukan alamat.</p>
+                            </div>
+                        </div>
+
+                        <div class="order-map-wrapper">
+                            <div class="order-map-header">
+                                <div>
+                                    <h3>Pilih Titik Lokasi</h3>
+                                    <p>Koordinat dan link maps akan disimpan untuk admin/kurir.</p>
+                                </div>
+
+                                <button type="button" class="order-location-btn" id="useMyLocationBtn">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Lokasi Saya
+                                </button>
+                            </div>
+
+                            <div id="orderMap" class="order-map"></div>
+
+                            <div class="order-location-preview">
+                                <div>
+                                    <span>Negara</span>
+                                    <strong id="previewCountry">Belum dipilih</strong>
+                                </div>
+
+                                <div>
+                                    <span>Provinsi</span>
+                                    <strong id="previewProvince">Belum dipilih</strong>
+                                </div>
+
+                                <div>
+                                    <span>Kab/Kota</span>
+                                    <strong id="previewCity">Belum dipilih</strong>
+                                </div>
+
+                                <div>
+                                    <span>Kecamatan</span>
+                                    <strong id="previewDistrict">Belum dipilih</strong>
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
+                            <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}">
+                            <input type="hidden" id="googleMapsLink" name="google_maps" value="{{ old('google_maps') }}">
+                            <input type="hidden" id="country" name="country" value="{{ old('country') }}">
+                            <input type="hidden" id="province" name="province" value="{{ old('province') }}">
+                            <input type="hidden" id="city" name="city" value="{{ old('city') }}">
+                            <input type="hidden" id="district" name="district" value="{{ old('district') }}">
+                            <input type="hidden" id="village" name="village" value="{{ old('village') }}">
                         </div>
                     </div>
 
@@ -132,18 +180,20 @@
                                 <div class="order-select">
                                     <i class="bi bi-basket3"></i>
                                     <select id="serviceSelect" name="service_id">
-                                        <option value="1" data-name="Setrika + Lipat" data-display-name="Cuci Komplit" data-price="5000">
-                                            Cuci Komplit - Rp5.000/kg
-                                        </option>
-                                        <option value="2" data-name="Lipat Saja" data-display-name="Cuci Kering" data-price="3000">
-                                            Cuci Kering - Rp3.000/kg
-                                        </option>
-                                        <option value="3" data-name="Setrika Saja" data-display-name="Setrika Saja" data-price="4000">
-                                            Setrika Saja - Rp4.000/kg
-                                        </option>
+                                        @foreach ($packages as $package)
+                                            <option
+                                                value="{{ $package->id }}"
+                                                data-name="{{ $package->service_name }}"
+                                                data-display-name="{{ $package->service_name }}"
+                                                data-price="{{ $package->price_per_kg }}"
+                                                @selected(old('service_id') == $package->id)
+                                            >
+                                                {{ $package->service_name }} - Rp{{ number_format($package->price_per_kg, 0, ',', '.') }}/kg
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
-                                <small class="order-error" data-error="service_id">
+                                <small class="order-error">
                                     @error('service_id') {{ $message }} @enderror
                                 </small>
                             </div>
@@ -153,18 +203,26 @@
                                 <div class="order-select">
                                     <i class="bi bi-stars"></i>
                                     <select id="fragranceSelect" name="fragrance_id">
-                                        <option value="4" data-name="Wangi Bunga" data-price="1000">
-                                            Wangi Bunga - Rp1.000/kg
-                                        </option>
-                                        <option value="5" data-name="Wangi Sport" data-price="1000">
-                                            Wangi Sport - Rp1.000/kg
-                                        </option>
-                                        <option value="6" data-name="Wangi Original" data-price="0">
-                                            Original - Gratis
-                                        </option>
+                                        @forelse ($fragrances as $fragrance)
+                                            <option
+                                                value="{{ $fragrance->id }}"
+                                                data-name="{{ $fragrance->service_name }}"
+                                                data-price="{{ $fragrance->price_per_kg }}"
+                                                @selected(old('fragrance_id') == $fragrance->id)
+                                            >
+                                                {{ $fragrance->service_name }}
+                                                @if ($fragrance->price_per_kg > 0)
+                                                    - Rp{{ number_format($fragrance->price_per_kg, 0, ',', '.') }}/kg
+                                                @else
+                                                    - Gratis
+                                                @endif
+                                            </option>
+                                        @empty
+                                            <option value="" data-name="Tanpa Wangi" data-price="0">Tanpa Wangi</option>
+                                        @endforelse
                                     </select>
                                 </div>
-                                <small class="order-error" data-error="fragrance_id">
+                                <small class="order-error">
                                     @error('fragrance_id') {{ $message }} @enderror
                                 </small>
                             </div>
@@ -173,23 +231,20 @@
                                 <label for="pickupSelect">Opsi Antar-Jemput</label>
                                 <div class="order-select">
                                     <i class="bi bi-truck"></i>
-                                    <select id="pickupSelect" name="pickup_type">
-                                        <option value="dijemput_antar" data-name="Dijemput & Diantar">
-                                            Dijemput & Diantar
-                                        </option>
-                                        <option value="dijemput_saja" data-name="Dijemput Saja">
-                                            Dijemput Saja
-                                        </option>
-                                        <option value="diantar_saja" data-name="Diantar Saja">
-                                            Diantar Saja
-                                        </option>
-                                        <option value="antar_ambil_sendiri" data-name="Antar & Ambil Sendiri">
-                                            Antar & Ambil Sendiri
-                                        </option>
+                                    <select id="pickupSelect" name="pickup_option_id">
+                                        @foreach ($pickupOptions as $pickupOption)
+                                            <option
+                                                value="{{ $pickupOption->id }}"
+                                                data-name="{{ $pickupOption->name }}"
+                                                @selected(old('pickup_option_id') == $pickupOption->id)
+                                            >
+                                                {{ $pickupOption->name }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
-                                <small class="order-error" data-error="pickup_type">
-                                    @error('pickup_type') {{ $message }} @enderror
+                                <small class="order-error">
+                                    @error('pickup_option_id') {{ $message }} @enderror
                                 </small>
                             </div>
 
@@ -203,14 +258,6 @@
                                 >{{ old('notes') }}</textarea>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="order-mobile-summary">
-                        <div>
-                            <span>Estimasi harga per kg</span>
-                            <strong id="mobileSummaryPrice">Rp6.000/kg</strong>
-                        </div>
-                        <small>Total akhir dihitung setelah cucian ditimbang admin.</small>
                     </div>
 
                     <button type="submit" class="btn btn-primary order-submit-button shadow-primary">
@@ -246,23 +293,23 @@
 
                             <div>
                                 <span>Layanan</span>
-                                <strong id="summaryService">Cuci Komplit</strong>
+                                <strong id="summaryService">-</strong>
                             </div>
 
                             <div>
                                 <span>Wangi</span>
-                                <strong id="summaryPerfume">Wangi Bunga</strong>
+                                <strong id="summaryPerfume">-</strong>
                             </div>
 
                             <div>
                                 <span>Antar-Jemput</span>
-                                <strong id="summaryDelivery">Dijemput & Diantar</strong>
+                                <strong id="summaryDelivery">-</strong>
                             </div>
                         </div>
 
                         <div class="order-summary-price">
                             <span>Estimasi harga per kg</span>
-                            <strong id="summaryPrice">Rp6.000/kg</strong>
+                            <strong id="summaryPrice">Rp0/kg</strong>
                         </div>
 
                         <div class="order-alert">
@@ -272,45 +319,14 @@
                                 Pembayaran dapat dilakukan menggunakan QRIS atau tunai.
                             </p>
                         </div>
-
-                        <div class="order-summary-actions">
-                            <a href="/periksa-pesanan" class="order-summary-link">
-                                <i class="bi bi-search"></i>
-                                Cek pesanan yang sudah dibuat
-                            </a>
-                        </div>
                     </div>
                 </aside>
-            </div>
-        </div>
-
-        {{-- Demo Success Modal --}}
-        <div class="order-modal" id="orderModal" aria-hidden="true">
-            <div class="order-modal-backdrop" data-close-modal></div>
-
-            <div class="order-modal-card">
-                <button type="button" class="order-modal-close" data-close-modal>
-                    <i class="bi bi-x-lg"></i>
-                </button>
-
-                <div class="order-modal-icon">
-                    <i class="bi bi-check2-circle"></i>
-                </div>
-
-                <h4>Form pemesanan sudah siap</h4>
-                <p>
-                    Struktur field sudah disesuaikan untuk backend. Setelah controller dibuat,
-                    data akan disimpan ke database.
-                </p>
-
-                <button type="button" class="btn btn-primary btn-modern" data-close-modal>
-                    Mengerti
-                </button>
             </div>
         </div>
     </section>
 @endsection
 
 @section('scripts')
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="{{ asset('js/order.js') }}"></script>
 @endsection

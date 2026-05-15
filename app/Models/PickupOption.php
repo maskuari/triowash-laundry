@@ -5,29 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Customer extends Model
+class PickupOption extends Model
 {
     protected $fillable = [
         'name',
-        'phone',
-        'address',
-        'google_maps',
-        'latitude',
-        'longitude',
-        'country',
-        'province',
-        'city',
-        'district',
-        'village',
+        'code',
+        'description',
+        'is_active',
     ];
 
     protected $casts = [
-        'latitude' => 'decimal:7',
-        'longitude' => 'decimal:7',
+        'is_active' => 'boolean',
     ];
 
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

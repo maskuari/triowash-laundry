@@ -12,6 +12,7 @@ class Order extends Model
     public const STATUS_MENUNGGU_VERIFIKASI = 'menunggu_verifikasi';
     public const STATUS_DIJEMPUT = 'dijemput';
     public const STATUS_DIPROSES = 'diproses';
+    public const STATUS_MENUNGGU_PEMBAYARAN = 'menunggu_pembayaran';
     public const STATUS_SELESAI = 'selesai';
     public const STATUS_DIANTAR = 'diantar';
     public const STATUS_SELESAI_DITERIMA = 'selesai_diterima';
@@ -24,6 +25,8 @@ class Order extends Model
         'customer_id',
         'order_code',
         'pickup_type',
+        'pickup_option_id',
+        'pickup_option_name',
         'status',
         'payment_status',
         'weight',
@@ -36,19 +39,6 @@ class Order extends Model
         'total_price' => 'integer',
     ];
 
-    public static function statuses(): array
-    {
-        return [
-            self::STATUS_MENUNGGU_VERIFIKASI,
-            self::STATUS_DIJEMPUT,
-            self::STATUS_DIPROSES,
-            self::STATUS_SELESAI,
-            self::STATUS_DIANTAR,
-            self::STATUS_SELESAI_DITERIMA,
-            self::STATUS_DIBATALKAN,
-        ];
-    }
-
     public static function generateOrderCode(): string
     {
         $lastOrder = self::query()->latest('id')->first();
@@ -57,9 +47,24 @@ class Order extends Model
         return 'TWO-' . str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
     }
 
+    public static function legacyPickupTypes(): array
+    {
+        return [
+            'dijemput_antar',
+            'dijemput_saja',
+            'diantar_saja',
+            'antar_ambil_sendiri',
+        ];
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function pickupOption(): BelongsTo
+    {
+        return $this->belongsTo(PickupOption::class);
     }
 
     public function orderItems(): HasMany
@@ -88,6 +93,7 @@ class Order extends Model
             self::STATUS_MENUNGGU_VERIFIKASI => 'Menunggu Verifikasi',
             self::STATUS_DIJEMPUT => 'Dijemput',
             self::STATUS_DIPROSES => 'Diproses',
+            self::STATUS_MENUNGGU_PEMBAYARAN => 'Menunggu Pembayaran',
             self::STATUS_SELESAI => 'Selesai',
             self::STATUS_DIANTAR => 'Diantar',
             self::STATUS_SELESAI_DITERIMA => 'Selesai Diterima',

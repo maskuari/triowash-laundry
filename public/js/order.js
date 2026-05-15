@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initOrderSummary();
     initOrderValidation();
-    initOrderModal();
+    initOrderMap();
 });
 
 function initOrderSummary() {
@@ -34,10 +34,8 @@ function updateOrderSummary() {
     const servicePrice = Number(selectedService?.dataset.price || 0);
     const fragrancePrice = Number(selectedFragrance?.dataset.price || 0);
     const totalPerKg = servicePrice + fragrancePrice;
-    const formattedPrice = formatRupiah(totalPerKg) + '/kg';
 
-    setText('summaryPrice', formattedPrice);
-    setText('mobileSummaryPrice', formattedPrice);
+    setText('summaryPrice', formatRupiah(totalPerKg) + '/kg');
 }
 
 function getSelectedOption(selectId) {
@@ -65,14 +63,6 @@ function initOrderValidation() {
         if (!isValid) {
             event.preventDefault();
             scrollToFirstError();
-            return;
-        }
-
-        const backendReady = form.dataset.backendReady === 'true';
-
-        if (!backendReady) {
-            event.preventDefault();
-            showOrderModal();
         }
     });
 }
@@ -82,7 +72,7 @@ function validateOrderForm() {
 
     const nameInput = document.getElementById('customerName');
     const phoneInput = document.getElementById('customerPhone');
-    const addressInput = document.getElementById('customerAddress');
+    const addressInput = document.getElementById('addressDetail');
 
     const name = nameInput?.value.trim();
     const phone = phoneInput?.value.trim();
@@ -102,7 +92,7 @@ function validateOrderForm() {
     }
 
     if (!address) {
-        setError('customerAddress', 'Alamat lengkap wajib diisi.');
+        setError('addressDetail', 'Detail alamat wajib diisi.');
         valid = false;
     }
 
@@ -151,34 +141,120 @@ function scrollToFirstError() {
     });
 }
 
-function initOrderModal() {
-    const closeButtons = document.querySelectorAll('[data-close-modal]');
+function initOrderMap() {
+    const mapElement = document.getElementById('orderMap');
 
-    closeButtons.forEach((button) => {
-        button.addEventListener('click', hideOrderModal);
+    if (!mapElement || typeof L === 'undefined') {
+        return;
+    }
+
+    const defaultLocation = {
+        lat: -3.318606,
+        lng: 114.594378,
+    };
+
+    const map = L.map('orderMap').setView([defaultLocation.lat, defaultLocation.lng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap',
+    }).addTo(map);
+
+    const marker = L.marker([defaultLocation.lat, defaultLocation.lng], {
+        draggable: true,
+    }).addTo(map);
+
+    updateLocation(defaultLocation.lat, defaultLocation.lng);
+
+    map.on('click', (event) => {
+        const { lat, lng } = event.latlng;
+
+        marker.setLatLng([lat, lng]);
+        updateLocation(lat, lng);
+    });
+
+    marker.on('dragend', () => {
+        const position = marker.getLatLng();
+
+        updateLocation(position.lat, position.lng);
+    });
+
+    const locationButton = document.getElementById('useMyLocationBtn');
+
+    locationButton?.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            alert('Browser kamu tidak mendukung fitur lokasi.');
+            return;
+        }
+
+        locationButton.disabled = true;
+        locationButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Mencari...';
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                map.setView([lat, lng], 16);
+                marker.setLatLng([lat, lng]);
+                updateLocation(lat, lng);
+
+                locationButton.disabled = false;
+                locationButton.innerHTML = '<i class="bi bi-geo-alt"></i> Lokasi Saya';
+            },
+            () => {
+                alert('Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.');
+
+                locationButton.disabled = false;
+                locationButton.innerHTML = '<i class="bi bi-geo-alt"></i> Lokasi Saya';
+            }
+        );
     });
 }
 
-function showOrderModal() {
-    const modal = document.getElementById('orderModal');
+async function updateLocation(lat, lng) {
+    setValue('latitude', lat.toFixed(7));
+    setValue('longitude', lng.toFixed(7));
+    setValue('googleMapsLink', `https://www.google.com/maps?q=${lat},${lng}`);
 
-    if (!modal) {
-        return;
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`
+        );
+
+        const data = await response.json();
+        const address = data.address || {};
+
+        const country = address.country || 'Indonesia';
+        const province = address.state || address.region || '-';
+        const city = address.city || address.town || address.county || address.municipality || '-';
+        const district = address.suburb || address.city_district || address.district || address.village || address.hamlet || '-';
+        const village = address.village || address.hamlet || address.neighbourhood || '-';
+
+        setValue('country', country);
+        setValue('province', province);
+        setValue('city', city);
+        setValue('district', district);
+        setValue('village', village);
+
+        setText('previewCountry', country);
+        setText('previewProvince', province);
+        setText('previewCity', city);
+        setText('previewDistrict', district);
+    } catch (error) {
+        setText('previewCountry', 'Gagal membaca');
+        setText('previewProvince', 'Gagal membaca');
+        setText('previewCity', 'Gagal membaca');
+        setText('previewDistrict', 'Gagal membaca');
     }
-
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden', 'false');
 }
 
-function hideOrderModal() {
-    const modal = document.getElementById('orderModal');
+function setValue(id, value) {
+    const element = document.getElementById(id);
 
-    if (!modal) {
-        return;
+    if (element) {
+        element.value = value;
     }
-
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden', 'true');
 }
 
 function setText(id, value) {
