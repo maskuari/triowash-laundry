@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MidtransController;
 
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -81,6 +82,11 @@ Route::delete('/admin/opsi-antar-jemput/{pickupOption}', [AdminController::class
     ->name('admin.pickup-options.delete');
 
 // Pembayaran
-Route::view('/pembayaran', 'payment.index')->name('payment.index');
+Route::get('/pembayaran/{order:order_code}', [MidtransController::class, 'pay'])
+    ->name('payment.pay');
+
+Route::post('/midtrans/notification', [MidtransController::class, 'notification'])
+    ->name('midtrans.notification');
+
 Route::view('/pembayaran/sukses', 'payment.success')->name('payment.success');
 Route::view('/pembayaran/gagal', 'payment.failed')->name('payment.failed');

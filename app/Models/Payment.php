@@ -9,6 +9,7 @@ class Payment extends Model
 {
     public const METHOD_QRIS = 'qris';
     public const METHOD_CASH = 'cash';
+    public const METHOD_MIDTRANS = 'midtrans';
 
     public const STATUS_UNPAID = 'unpaid';
     public const STATUS_PAID = 'paid';
@@ -17,6 +18,11 @@ class Payment extends Model
     protected $fillable = [
         'order_id',
         'payment_code',
+        'snap_token',
+        'midtrans_order_id',
+        'transaction_id',
+        'payment_type',
+        'fraud_status',
         'method',
         'status',
         'amount',

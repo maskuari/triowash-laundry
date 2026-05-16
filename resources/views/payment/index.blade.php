@@ -4,7 +4,19 @@
 
 @section('styles')
     <link href="{{ asset('css/payment.css') }}" rel="stylesheet">
+
+    @if ($isProduction)
+        <script src="https://app.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
+    @else
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
+    @endif
 @endsection
+
+@php
+    $mainService = $order?->orderItems?->firstWhere('service.category', 'paket')?->service;
+    $serviceType = $order?->orderItems?->firstWhere('service.category', 'layanan')?->service;
+    $fragrance = $order?->orderItems?->firstWhere('service.category', 'wangi')?->service;
+@endphp
 
 @section('content')
     <section class="payment-page">
@@ -21,37 +33,37 @@
                     </div>
 
                     <h1>
-                        Pilih metode
+                        Selesaikan
                         <span>pembayaranmu.</span>
                     </h1>
 
                     <p>
                         Total pembayaran muncul setelah cucian ditimbang oleh admin.
-                        Kamu bisa memilih pembayaran QRIS atau tunai sesuai kondisi pemesanan.
+                        Klik tombol Bayar Sekarang untuk melanjutkan pembayaran melalui Midtrans.
                     </p>
 
                     <div class="payment-info-list">
                         <div class="payment-info-item">
-                            <i class="bi bi-qr-code"></i>
+                            <i class="bi bi-credit-card-2-front"></i>
                             <div>
-                                <strong>QRIS</strong>
-                                <span>Cocok untuk pelanggan jarak jauh.</span>
-                            </div>
-                        </div>
-
-                        <div class="payment-info-item">
-                            <i class="bi bi-cash-stack"></i>
-                            <div>
-                                <strong>Tunai</strong>
-                                <span>Cocok untuk pelanggan walk-in atau bayar di toko.</span>
+                                <strong>Midtrans</strong>
+                                <span>Bisa bayar lewat QRIS, e-wallet, virtual account, dan metode lain yang tersedia.</span>
                             </div>
                         </div>
 
                         <div class="payment-info-item">
                             <i class="bi bi-shield-check"></i>
                             <div>
-                                <strong>Transparan</strong>
-                                <span>Total dihitung berdasarkan berat aktual.</span>
+                                <strong>Aman</strong>
+                                <span>Pembayaran diproses langsung oleh Midtrans.</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item">
+                            <i class="bi bi-receipt"></i>
+                            <div>
+                                <strong>Otomatis</strong>
+                                <span>Status pembayaran akan diperbarui otomatis setelah pembayaran berhasil.</span>
                             </div>
                         </div>
                     </div>
@@ -62,7 +74,7 @@
                     <div class="payment-card-header">
                         <div>
                             <span>Payment Detail</span>
-                            <h2>Konfirmasi Pembayaran</h2>
+                            <h2>Detail Pembayaran</h2>
                         </div>
 
                         <div class="payment-header-icon">
@@ -76,126 +88,115 @@
                             <div class="payment-order-top">
                                 <div>
                                     <span>Kode Pesanan</span>
-                                    <strong>TWO-001</strong>
+                                    <strong>{{ $order->order_code }}</strong>
                                 </div>
 
-                                <small>Belum Dibayar</small>
+                                <small>{{ $order->payment_status_label }}</small>
                             </div>
 
                             <div class="payment-order-grid">
                                 <div>
                                     <span>Nama</span>
-                                    <strong>Budi Santoso</strong>
+                                    <strong>{{ $order->customer->name }}</strong>
                                 </div>
 
                                 <div>
                                     <span>No. Telepon</span>
-                                    <strong>081234567890</strong>
+                                    <strong>{{ $order->customer->phone }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Paket</span>
+                                    <strong>{{ $mainService?->service_name ?? '-' }}</strong>
                                 </div>
 
                                 <div>
                                     <span>Layanan</span>
-                                    <strong>Cuci Komplit</strong>
+                                    <strong>{{ $serviceType?->service_name ?? '-' }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Wangi</span>
+                                    <strong>{{ $fragrance?->service_name ?? '-' }}</strong>
                                 </div>
 
                                 <div>
                                     <span>Berat</span>
-                                    <strong>3.5 Kg</strong>
+                                    <strong>{{ $order->weight ? $order->weight . ' Kg' : 'Belum ditimbang' }}</strong>
                                 </div>
                             </div>
 
                             <div class="payment-total-box">
                                 <span>Total Pembayaran</span>
-                                <strong>Rp21.000</strong>
+                                <strong>
+                                    @if ($order->total_price > 0)
+                                        Rp{{ number_format($order->total_price, 0, ',', '.') }}
+                                    @else
+                                        Belum dihitung
+                                    @endif
+                                </strong>
                             </div>
                         </div>
 
-                        {{-- Method --}}
-                        <div class="payment-method-section">
-                            <h5>Pilih Metode Pembayaran</h5>
-
-                            <div class="payment-method-grid">
-                                <button type="button" class="payment-method active" data-method="qris">
-                                    <i class="bi bi-qr-code"></i>
-                                    <div>
-                                        <strong>QRIS</strong>
-                                        <span>Scan QR untuk membayar</span>
-                                    </div>
-                                </button>
-
-                                <button type="button" class="payment-method" data-method="cash">
-                                    <i class="bi bi-cash-stack"></i>
-                                    <div>
-                                        <strong>Tunai</strong>
-                                        <span>Bayar langsung ke admin</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        {{-- QRIS Content --}}
-                        <div class="payment-content active" id="qrisContent">
-                            <div class="qris-card">
-                                <div class="qris-box">
-                                    <div class="qris-placeholder">
-                                        <i class="bi bi-qr-code"></i>
-                                    </div>
-                                </div>
-
-                                <div class="qris-info">
-                                    <h5>Scan QRIS untuk membayar</h5>
-                                    <p>
-                                        Buka aplikasi pembayaran atau mobile banking, lalu scan kode QRIS ini.
-                                        Setelah pembayaran berhasil, klik tombol konfirmasi.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <a href="/pembayaran/sukses" class="payment-confirm-btn text-decoration-none">
-                                <i class="bi bi-check-circle"></i>
-                                Saya Sudah Bayar QRIS
-                            </a>
-                            <a href="/pembayaran/gagal" class="payment-failed-link">
-                                Simulasikan pembayaran gagal
-                            </a>
-                        </div>
-
-                        {{-- Cash Content --}}
-                        <div class="payment-content" id="cashContent">
+                        @if ($order->payment_status === \App\Models\Order::PAYMENT_PAID)
                             <div class="cash-card">
                                 <div class="cash-icon">
-                                    <i class="bi bi-cash-coin"></i>
+                                    <i class="bi bi-check-circle"></i>
                                 </div>
 
                                 <div>
-                                    <h5>Pembayaran Tunai</h5>
+                                    <h5>Pembayaran Sudah Berhasil</h5>
                                     <p>
-                                        Pilih metode tunai jika pelanggan membayar langsung di toko
-                                        atau saat pesanan diterima. Admin akan mengonfirmasi pembayaran.
+                                        Pesanan ini sudah dibayar. Kamu bisa kembali ke halaman Periksa Pesanan
+                                        untuk melihat status laundry.
                                     </p>
                                 </div>
                             </div>
+                        @elseif ($order->total_price <= 0)
+                            <div class="cash-card">
+                                <div class="cash-icon">
+                                    <i class="bi bi-clock"></i>
+                                </div>
 
-                            <div class="cash-input-box">
-                                <label>Nominal Uang Diterima</label>
                                 <div>
-                                    <span>Rp</span>
-                                    <input type="number" placeholder="Contoh: 25000">
+                                    <h5>Menunggu Total Pembayaran</h5>
+                                    <p>
+                                        Total pembayaran belum tersedia. Silakan tunggu admin menimbang cucian
+                                        dan menghitung total harga terlebih dahulu.
+                                    </p>
                                 </div>
                             </div>
+                        @else
+                            {{-- Midtrans Content --}}
+                            <div class="payment-content active" id="midtransContent">
+                                <div class="qris-card">
+                                    <div class="qris-box">
+                                        <div class="qris-placeholder">
+                                            <i class="bi bi-credit-card"></i>
+                                        </div>
+                                    </div>
 
-                            <div class="cash-change-box">
-                                <span>Estimasi Kembalian</span>
-                                <strong>Rp4.000</strong>
+                                    <div class="qris-info">
+                                        <h5>Bayar melalui Midtrans</h5>
+                                        <p>
+                                            Klik tombol di bawah ini. Nanti akan muncul popup pembayaran Midtrans.
+                                            Pilih metode pembayaran yang tersedia, lalu selesaikan pembayaran.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button type="button" id="pay-button" class="payment-confirm-btn">
+                                    <i class="bi bi-credit-card"></i>
+                                    Bayar Sekarang
+                                </button>
+
+                                <a href="{{ route('payment.failed') }}" class="payment-failed-link">
+                                    Batalkan pembayaran
+                                </a>
                             </div>
+                        @endif
 
-                            <button type="button" class="payment-confirm-btn">
-                                <i class="bi bi-check-circle"></i>
-                                Konfirmasi Pembayaran Tunai
-                            </button>
-                        </div>
-
-                        <a href="/periksa-pesanan" class="payment-back-link">
+                        <a href="{{ route('tracking.index') }}" class="payment-back-link">
                             <i class="bi bi-arrow-left"></i>
                             Kembali ke Periksa Pesanan
                         </a>
@@ -207,29 +208,30 @@
 @endsection
 
 @section('scripts')
-    <script>
-        const methodButtons = document.querySelectorAll('.payment-method');
-        const qrisContent = document.getElementById('qrisContent');
-        const cashContent = document.getElementById('cashContent');
+    @if (
+        $order->payment_status === \App\Models\Order::PAYMENT_UNPAID &&
+        $order->total_price > 0
+    )
+        <script>
+            const payButton = document.getElementById('pay-button');
 
-        methodButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                const method = button.dataset.method;
-
-                methodButtons.forEach((item) => item.classList.remove('active'));
-                button.classList.add('active');
-
-                qrisContent.classList.remove('active');
-                cashContent.classList.remove('active');
-
-                if (method === 'qris') {
-                    qrisContent.classList.add('active');
-                }
-
-                if (method === 'cash') {
-                    cashContent.classList.add('active');
-                }
+            payButton?.addEventListener('click', function () {
+                snap.pay('{{ $snapToken }}', {
+                    onSuccess: function () {
+                        window.location.href = '{{ route('payment.success') }}';
+                    },
+                    onPending: function () {
+                        alert('Pembayaran masih pending. Silakan selesaikan pembayaran.');
+                        window.location.href = '{{ route('tracking.index') }}';
+                    },
+                    onError: function () {
+                        window.location.href = '{{ route('payment.failed') }}';
+                    },
+                    onClose: function () {
+                        alert('Popup pembayaran ditutup. Kamu bisa klik Bayar Sekarang lagi untuk melanjutkan.');
+                    }
+                });
             });
-        });
-    </script>
+        </script>
+    @endif
 @endsection
