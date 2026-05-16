@@ -48,7 +48,7 @@ class MidtransController extends Controller
             'callbacks' => [
                 'finish' => route('payment.success'),
                 'error' => route('payment.failed'),
-                'pending' => route('payment.index'),
+                'pending' => route('tracking.index'),
             ],
         ];
 
@@ -67,12 +67,12 @@ class MidtransController extends Controller
             ]
         );
 
-        return view('payment.midtrans', [
-            'order' => $order,
-            'snapToken' => $snapToken,
-            'clientKey' => config('services.midtrans.client_key'),
-            'isProduction' => config('services.midtrans.is_production'),
-        ]);
+       return view('payment.index', [
+                'order' => $order,
+                'snapToken' => $snapToken,
+                'clientKey' => config('services.midtrans.client_key'),
+                'isProduction' => config('services.midtrans.is_production'),
+            ]);
     }
 
     public function notification(Request $request)
