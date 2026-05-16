@@ -190,7 +190,7 @@
                                 </div>
 
                                 @if ($order->payment_status === \App\Models\Order::PAYMENT_UNPAID && $order->total_price > 0)
-                                    <a href="/pembayaran?order={{ $order->order_code }}" class="tracking-pay-link">
+                                   <a href="{{ route('payment.pay', $order->order_code) }}" class="tracking-pay-link">
                                         <i class="bi bi-qr-code"></i>
                                         Bayar
                                     </a>

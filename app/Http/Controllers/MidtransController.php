@@ -34,7 +34,7 @@ class MidtransController extends Controller
 
         $this->setupMidtrans();
 
-        $midtransOrderId = $order->order_code . '-' . time();
+        $midtransOrderId = $order->order_code . '-' . uniqid();
 
         $params = [
             'transaction_details' => [
@@ -50,22 +50,32 @@ class MidtransController extends Controller
                 'error' => route('payment.failed'),
                 'pending' => route('tracking.index'),
             ],
+            'expiry' => [
+                'start_time' => date('Y-m-d H:i:s O'),
+                'unit' => 'minutes',
+                'duration' => 60,
+            ],
         ];
-
         $snapToken = Snap::getSnapToken($params);
 
         Payment::updateOrCreate(
-            ['order_id' => $order->id],
-            [
-                'payment_code' => $order->payment?->payment_code ?? Payment::generatePaymentCode(),
-                'snap_token' => $snapToken,
-                'midtrans_order_id' => $midtransOrderId,
-                'method' => Payment::METHOD_MIDTRANS,
-                'status' => Payment::STATUS_UNPAID,
-                'amount' => $order->total_price,
-                'notes' => 'Pembayaran online melalui Midtrans.',
-            ]
-        );
+        ['order_id' => $order->id],
+        [
+            'payment_code' => $order->payment?->payment_code ?? Payment::generatePaymentCode(),
+            'snap_token' => $snapToken,
+            'midtrans_order_id' => $midtransOrderId,
+            'transaction_id' => null,
+            'payment_type' => null,
+            'fraud_status' => null,
+            'method' => Payment::METHOD_MIDTRANS,
+            'status' => Payment::STATUS_UNPAID,
+            'amount' => $order->total_price,
+            'cash_received' => null,
+            'change_amount' => null,
+            'paid_at' => null,
+            'notes' => 'Pembayaran online melalui Midtrans.',
+        ]
+    );
 
        return view('payment.index', [
                 'order' => $order,
