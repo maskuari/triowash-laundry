@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->string('payment_code')->unique();
 
-            $table->enum('method', ['qris', 'cash']);
+            $table->enum('method', ['qris', 'cash', 'midtrans']);
             $table->enum('status', ['unpaid', 'paid', 'failed'])->default('unpaid');
 
             $table->unsignedInteger('amount')->default(0);

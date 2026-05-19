@@ -25,7 +25,6 @@
 
         <div class="container position-relative z-index-1">
             <div class="payment-layout">
-                {{-- Left --}}
                 <div class="payment-intro" data-aos="fade-right" data-aos-duration="900">
                     <div class="payment-badge">
                         <i class="bi bi-credit-card"></i>
@@ -66,10 +65,21 @@
                                 <span>Status pembayaran akan diperbarui otomatis setelah pembayaran berhasil.</span>
                             </div>
                         </div>
+
+                        @if (! $isProduction)
+                            <div class="payment-info-item">
+                                <i class="bi bi-tools"></i>
+                                <div>
+                                    <strong>Mode Demo</strong>
+                                    <span>
+                                        Karena masih sandbox, pembayaran bisa disimulasikan berhasil tanpa scan QRIS asli.
+                                    </span>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
-                {{-- Right --}}
                 <div class="payment-card" data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
                     <div class="payment-card-header">
                         <div>
@@ -83,7 +93,6 @@
                     </div>
 
                     <div class="payment-body">
-                        {{-- Order Summary --}}
                         <div class="payment-order-card">
                             <div class="payment-order-top">
                                 <div>
@@ -167,7 +176,6 @@
                                 </div>
                             </div>
                         @else
-                            {{-- Midtrans Content --}}
                             <div class="payment-content active" id="midtransContent">
                                 <div class="qris-card">
                                     <div class="qris-box">
@@ -182,6 +190,13 @@
                                             Klik tombol di bawah ini. Nanti akan muncul popup pembayaran Midtrans.
                                             Pilih metode pembayaran yang tersedia, lalu selesaikan pembayaran.
                                         </p>
+
+                                        @if (! $isProduction)
+                                            <p>
+                                                Untuk demo, jika QRIS tidak bisa discan, gunakan tombol
+                                                <strong>Simulasikan Pembayaran Berhasil</strong>.
+                                            </p>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -190,7 +205,21 @@
                                     Bayar Sekarang
                                 </button>
 
-                                <a href="{{ route('payment.failed') }}" class="payment-failed-link">
+                                @if (! $isProduction)
+                                    <form action="{{ route('payment.simulate-success', $order->order_code) }}"
+                                          method="POST"
+                                          class="mt-2"
+                                          onsubmit="return confirm('Simulasikan pembayaran ini sebagai berhasil?')">
+                                        @csrf
+
+                                        <button type="submit" class="payment-confirm-btn">
+                                            <i class="bi bi-check-circle"></i>
+                                            Simulasikan Pembayaran Berhasil
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <a href="{{ route('payment.failed', $order->order_code) }}" class="payment-failed-link">
                                     Batalkan pembayaran
                                 </a>
                             </div>
@@ -218,14 +247,14 @@
             payButton?.addEventListener('click', function () {
                 snap.pay('{{ $snapToken }}', {
                     onSuccess: function () {
-                        window.location.href = '{{ route('payment.success') }}';
+                        window.location.href = '{{ route('payment.success', $order->order_code) }}';
                     },
                     onPending: function () {
                         alert('Pembayaran masih pending. Silakan selesaikan pembayaran.');
                         window.location.href = '{{ route('tracking.index') }}';
                     },
                     onError: function () {
-                        window.location.href = '{{ route('payment.failed') }}';
+                        window.location.href = '{{ route('payment.failed', $order->order_code) }}';
                     },
                     onClose: function () {
                         alert('Popup pembayaran ditutup. Kamu bisa klik Bayar Sekarang lagi untuk melanjutkan.');

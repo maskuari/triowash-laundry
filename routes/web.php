@@ -3,10 +3,10 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AiCustomerServiceController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MidtransController;
 
 // Home
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -88,5 +88,11 @@ Route::get('/pembayaran/{order:order_code}', [MidtransController::class, 'pay'])
 Route::post('/midtrans/notification', [MidtransController::class, 'notification'])
     ->name('midtrans.notification');
 
-Route::view('/pembayaran/sukses', 'payment.success')->name('payment.success');
-Route::view('/pembayaran/gagal', 'payment.failed')->name('payment.failed');
+Route::post('/pembayaran/{order:order_code}/simulasi-berhasil', [MidtransController::class, 'simulateSuccess'])
+    ->name('payment.simulate-success');
+
+Route::get('/pembayaran/sukses/{order:order_code}', [MidtransController::class, 'success'])
+    ->name('payment.success');
+
+Route::get('/pembayaran/gagal/{order:order_code}', [MidtransController::class, 'failed'])
+    ->name('payment.failed');

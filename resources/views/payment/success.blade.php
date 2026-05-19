@@ -26,28 +26,28 @@
 
                 <p>
                     Pembayaran untuk pesanan laundry kamu sudah dikonfirmasi.
-                    Status pembayaran akan diperbarui menjadi lunas pada sistem Triowash.
+                    Status pembayaran sudah diperbarui menjadi lunas pada sistem Triowash.
                 </p>
 
                 <div class="payment-result-summary">
                     <div>
                         <span>Kode Pesanan</span>
-                        <strong>TWO-001</strong>
+                        <strong>{{ $order->order_code }}</strong>
                     </div>
 
                     <div>
                         <span>Metode</span>
-                        <strong>QRIS</strong>
+                        <strong>{{ strtoupper($order->payment?->payment_type ?? $order->payment?->method ?? 'MIDTRANS') }}</strong>
                     </div>
 
                     <div>
                         <span>Total Bayar</span>
-                        <strong>Rp21.000</strong>
+                        <strong>Rp{{ number_format($order->total_price, 0, ',', '.') }}</strong>
                     </div>
 
                     <div>
                         <span>Status</span>
-                        <strong class="text-success">Paid</strong>
+                        <strong class="text-success">{{ ucfirst($order->payment_status) }}</strong>
                     </div>
                 </div>
 
@@ -59,12 +59,12 @@
                 </div>
 
                 <div class="payment-result-actions">
-                    <a href="/periksa-pesanan" class="btn btn-primary btn-modern shadow-primary">
+                    <a href="{{ route('tracking.index') }}" class="btn btn-primary btn-modern shadow-primary">
                         <i class="bi bi-search"></i>
                         Cek Status Pesanan
                     </a>
 
-                    <a href="/" class="btn btn-light btn-modern">
+                    <a href="{{ route('home') }}" class="btn btn-light btn-modern">
                         <i class="bi bi-house-door"></i>
                         Kembali ke Beranda
                     </a>

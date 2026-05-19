@@ -32,22 +32,22 @@
                 <div class="payment-result-summary">
                     <div>
                         <span>Kode Pesanan</span>
-                        <strong>TWO-001</strong>
+                        <strong>{{ $order->order_code }}</strong>
                     </div>
 
                     <div>
                         <span>Metode</span>
-                        <strong>QRIS</strong>
+                        <strong>{{ strtoupper($order->payment?->payment_type ?? $order->payment?->method ?? 'MIDTRANS') }}</strong>
                     </div>
 
                     <div>
                         <span>Total Tagihan</span>
-                        <strong>Rp21.000</strong>
+                        <strong>Rp{{ number_format($order->total_price, 0, ',', '.') }}</strong>
                     </div>
 
                     <div>
                         <span>Status</span>
-                        <strong class="text-danger">Unpaid</strong>
+                        <strong class="text-danger">{{ ucfirst($order->payment_status) }}</strong>
                     </div>
                 </div>
 
@@ -59,12 +59,12 @@
                 </div>
 
                 <div class="payment-result-actions">
-                    <a href="/pembayaran" class="btn btn-primary btn-modern shadow-primary">
+                    <a href="{{ route('payment.pay', $order->order_code) }}" class="btn btn-primary btn-modern shadow-primary">
                         <i class="bi bi-arrow-repeat"></i>
                         Coba Bayar Lagi
                     </a>
 
-                    <a href="/periksa-pesanan" class="btn btn-light btn-modern">
+                    <a href="{{ route('tracking.index') }}" class="btn btn-light btn-modern">
                         <i class="bi bi-search"></i>
                         Cek Pesanan
                     </a>
