@@ -45,6 +45,14 @@
                     <span>Pembayaran</span>
                 </a>
             </nav>
+
+            <form method="POST" action="{{ route('admin.logout') }}" class="admin-sidebar-logout">
+                @csrf
+                <button type="submit">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Keluar Admin</span>
+                </button>
+            </form>
         </aside>
 
         <main class="admin-main">

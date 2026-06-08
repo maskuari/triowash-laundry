@@ -60,6 +60,14 @@
                 </a>
             </nav>
 
+            <form method="POST" action="{{ route('admin.logout') }}" class="admin-sidebar-logout">
+                @csrf
+                <button type="submit">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Keluar Admin</span>
+                </button>
+            </form>
+
             <div class="admin-sidebar-card">
                 <i class="bi bi-robot"></i>
                 <h6>AI CS Aktif</h6>

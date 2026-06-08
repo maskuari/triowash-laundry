@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AiCustomerServiceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MidtransController;
@@ -28,58 +29,66 @@ Route::get('/pesan/sukses/{order:order_code}', [OrderController::class, 'success
 Route::get('/periksa-pesanan', [TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/periksa-pesanan', [TrackingController::class, 'search'])->name('tracking.search');
 
-// Admin Dashboard
-Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+// Admin Auth
+Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 
-Route::patch('/admin/pesanan/terima-semua', [AdminController::class, 'approveAllIncomingOrders'])
-    ->name('admin.orders.approve-all');
+Route::middleware('admin.auth')->prefix('admin')->group(function () {
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
-Route::delete('/admin/pesanan/tolak-semua', [AdminController::class, 'rejectAllIncomingOrders'])
-    ->name('admin.orders.reject-all');
+    // Admin Dashboard
+    Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
 
-Route::patch('/admin/toko/status', [AdminController::class, 'updateStoreStatus'])
-    ->name('admin.store-status.update');
+    Route::patch('/pesanan/terima-semua', [AdminController::class, 'approveAllIncomingOrders'])
+        ->name('admin.orders.approve-all');
 
-Route::get('/admin/pesanan/{order:order_code}', [AdminController::class, 'showOrder'])
-    ->name('admin.orders.show');
+    Route::delete('/pesanan/tolak-semua', [AdminController::class, 'rejectAllIncomingOrders'])
+        ->name('admin.orders.reject-all');
 
-Route::patch('/admin/pesanan/{order:order_code}/acc', [AdminController::class, 'approveOrder'])
-    ->name('admin.orders.approve');
+    Route::patch('/toko/status', [AdminController::class, 'updateStoreStatus'])
+        ->name('admin.store-status.update');
 
-Route::patch('/admin/pesanan/{order:order_code}/tolak', [AdminController::class, 'rejectOrder'])
-    ->name('admin.orders.reject');
+    Route::get('/pesanan/{order:order_code}', [AdminController::class, 'showOrder'])
+        ->name('admin.orders.show');
 
-Route::patch('/admin/pesanan/{order:order_code}/timbang', [AdminController::class, 'updateWeight'])
-    ->name('admin.orders.weight');
+    Route::patch('/pesanan/{order:order_code}/acc', [AdminController::class, 'approveOrder'])
+        ->name('admin.orders.approve');
 
-Route::patch('/admin/pesanan/{order:order_code}/status', [AdminController::class, 'updateStatus'])
-    ->name('admin.orders.status');
+    Route::patch('/pesanan/{order:order_code}/tolak', [AdminController::class, 'rejectOrder'])
+        ->name('admin.orders.reject');
 
-Route::post('/admin/pesanan/{order:order_code}/bayar-tunai', [AdminController::class, 'confirmCashPayment'])
-    ->name('admin.orders.cash-payment');
+    Route::patch('/pesanan/{order:order_code}/timbang', [AdminController::class, 'updateWeight'])
+        ->name('admin.orders.weight');
 
-Route::delete('/admin/pesanan/{order:order_code}', [AdminController::class, 'deleteOrder'])
-    ->name('admin.orders.delete');
+    Route::patch('/pesanan/{order:order_code}/status', [AdminController::class, 'updateStatus'])
+        ->name('admin.orders.status');
 
-// Admin Layanan, Paket, Wangi
-Route::post('/admin/layanan', [AdminController::class, 'storeService'])
-    ->name('admin.services.store');
+    Route::post('/pesanan/{order:order_code}/bayar-tunai', [AdminController::class, 'confirmCashPayment'])
+        ->name('admin.orders.cash-payment');
 
-Route::patch('/admin/layanan/{service}', [AdminController::class, 'updateService'])
-    ->name('admin.services.update');
+    Route::delete('/pesanan/{order:order_code}', [AdminController::class, 'deleteOrder'])
+        ->name('admin.orders.delete');
 
-Route::delete('/admin/layanan/{service}', [AdminController::class, 'deleteService'])
-    ->name('admin.services.delete');
+    // Admin Layanan, Paket, Wangi
+    Route::post('/layanan', [AdminController::class, 'storeService'])
+        ->name('admin.services.store');
 
-// Admin Opsi Antar Jemput
-Route::post('/admin/opsi-antar-jemput', [AdminController::class, 'storePickupOption'])
-    ->name('admin.pickup-options.store');
+    Route::patch('/layanan/{service}', [AdminController::class, 'updateService'])
+        ->name('admin.services.update');
 
-Route::patch('/admin/opsi-antar-jemput/{pickupOption}', [AdminController::class, 'updatePickupOption'])
-    ->name('admin.pickup-options.update');
+    Route::delete('/layanan/{service}', [AdminController::class, 'deleteService'])
+        ->name('admin.services.delete');
 
-Route::delete('/admin/opsi-antar-jemput/{pickupOption}', [AdminController::class, 'deletePickupOption'])
-    ->name('admin.pickup-options.delete');
+    // Admin Opsi Antar Jemput
+    Route::post('/opsi-antar-jemput', [AdminController::class, 'storePickupOption'])
+        ->name('admin.pickup-options.store');
+
+    Route::patch('/opsi-antar-jemput/{pickupOption}', [AdminController::class, 'updatePickupOption'])
+        ->name('admin.pickup-options.update');
+
+    Route::delete('/opsi-antar-jemput/{pickupOption}', [AdminController::class, 'deletePickupOption'])
+        ->name('admin.pickup-options.delete');
+});
 
 // Pembayaran
 Route::get('/pembayaran/{order:order_code}', [MidtransController::class, 'pay'])

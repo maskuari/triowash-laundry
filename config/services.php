@@ -31,9 +31,15 @@ return [
 
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+        'fallback_models' => array_filter(array_map('trim', explode(',', (string) env(
+            'GEMINI_FALLBACK_MODELS',
+            'gemini-2.5-flash-lite,gemini-2.0-flash-lite'
+        )))),
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         'timeout' => env('GEMINI_TIMEOUT', 30),
+        'verify_ssl' => env('GEMINI_VERIFY_SSL', true),
+        'ca_file' => env('GEMINI_CA_FILE'),
     ],
 
     'midtrans' => [
