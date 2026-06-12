@@ -25,11 +25,6 @@ class PickupOptionSeeder extends Seeder
                 'code' => 'diantar_saja',
                 'description' => 'Pelanggan mengantar pakaian, kurir mengantar kembali.',
             ],
-            [
-                'name' => 'Antar & Ambil Sendiri',
-                'code' => 'antar_ambil_sendiri',
-                'description' => 'Pelanggan mengantar dan mengambil sendiri di toko.',
-            ],
         ];
 
         foreach ($options as $option) {

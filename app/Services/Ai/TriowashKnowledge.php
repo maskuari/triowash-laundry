@@ -43,7 +43,6 @@ Opsi layanan antar jemput:
 - Dijemput dan diantar
 - Dijemput saja
 - Diantar saja
-- Antar dan ambil sendiri
 
 Status pesanan:
 - menunggu_verifikasi: pesanan baru masuk dan menunggu ACC admin
