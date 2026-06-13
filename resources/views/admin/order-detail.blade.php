@@ -10,17 +10,32 @@
     $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
     $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
     $isLocked = $order->status === \App\Models\Order::STATUS_SELESAI_DITERIMA;
+
+    $cleanPhone = preg_replace('/\D/', '', $order->customer->phone ?? '');
+
+    if (substr($cleanPhone, 0, 1) === '0') {
+        $waPhone = '62' . substr($cleanPhone, 1);
+    } elseif (substr($cleanPhone, 0, 2) === '62') {
+        $waPhone = $cleanPhone;
+    } elseif (substr($cleanPhone, 0, 1) === '8') {
+        $waPhone = '62' . $cleanPhone;
+    } else {
+        $waPhone = $cleanPhone;
+    }
+
+    $waMessage = rawurlencode(
+        'Halo ' . $order->customer->name . ', kami dari Triowash. Kami ingin memberitahukan informasi terbaru terkait pesanan laundry kamu dengan kode ' . $order->order_code . '. Silakan balas pesan ini jika ingin bertanya atau membutuhkan bantuan. Terima kasih.'
+    );
+
+    $waUrl = $waPhone ? 'https://wa.me/' . $waPhone . '?text=' . $waMessage : null;
 @endphp
 
 @section('content')
     <section class="admin-page">
         <aside class="admin-sidebar">
             <a href="/admin" class="admin-brand">
-                <img
-                    src="{{ asset('assets/images/logo.png') }}"
-                    alt="Triowash"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
-                >
+                <img src="{{ asset('assets/images/logo.png') }}" alt="Triowash"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
                 <span>triowash</span>
             </a>
 
@@ -117,6 +132,13 @@
                         <div>
                             <span>No. Telepon</span>
                             <strong>{{ $order->customer->phone }}</strong>
+
+                            @if ($waUrl)
+                                <a href="{{ $waUrl }}" target="_blank" class="admin-wa-link">
+                                    <i class="bi bi-whatsapp"></i>
+                                    Hubungi WhatsApp
+                                </a>
+                            @endif
                         </div>
 
                         <div class="admin-detail-full">
@@ -259,13 +281,16 @@
 
                                 <label>Update Status</label>
                                 <select name="status">
-                                    <option value="menunggu_verifikasi" @selected($order->status === 'menunggu_verifikasi')>Menunggu Verifikasi</option>
+                                    <option value="menunggu_verifikasi" @selected($order->status === 'menunggu verifikasi')>
+                                        Menunggu Verifikasi</option>
                                     <option value="dijemput" @selected($order->status === 'dijemput')>Dijemput</option>
                                     <option value="diproses" @selected($order->status === 'diproses')>Diproses</option>
-                                    <option value="menunggu_pembayaran" @selected($order->status === 'menunggu_pembayaran')>Menunggu Pembayaran</option>
+                                    <option value="menunggu_pembayaran" @selected($order->status === 'menunggu pembayaran')>
+                                        Menunggu Pembayaran</option>
                                     <option value="selesai" @selected($order->status === 'selesai')>Selesai</option>
                                     <option value="diantar" @selected($order->status === 'diantar')>Diantar</option>
-                                    <option value="selesai_diterima" @selected($order->status === 'selesai_diterima')>Selesai Diterima</option>
+                                    <option value="selesai_diterima" @selected($order->status === 'selesai_diterima')>Selesai
+                                        Diterima</option>
                                     <option value="dibatalkan" @selected($order->status === 'dibatalkan')>Dibatalkan</option>
                                 </select>
 
@@ -291,19 +316,15 @@
                             <p>Berat cucian sudah dikunci karena pesanan selesai diterima.</p>
                         </div>
                     @else
-                        <form method="POST" action="{{ route('admin.orders.weight', $order->order_code) }}" class="admin-weight-form">
+                        <form method="POST" action="{{ route('admin.orders.weight', $order->order_code) }}"
+                            class="admin-weight-form">
                             @csrf
                             @method('PATCH')
 
                             <label>Berat Cucian</label>
                             <div class="admin-input-group">
-                                <input
-                                    type="number"
-                                    name="weight"
-                                    step="0.1"
-                                    value="{{ old('weight', $order->weight) }}"
-                                    placeholder="Contoh: 3.5"
-                                >
+                                <input type="number" name="weight" step="0.1" value="{{ old('weight', $order->weight) }}"
+                                    placeholder="Contoh: 3.5">
                                 <span>Kg</span>
                             </div>
 
@@ -328,7 +349,8 @@
                             <p>Pembayaran sudah dikunci karena pesanan selesai diterima.</p>
                         </div>
                     @elseif ($order->total_price > 0 && $order->payment_status === \App\Models\Order::PAYMENT_UNPAID)
-                        <form method="POST" action="{{ route('admin.orders.cash-payment', $order->order_code) }}" class="admin-weight-form">
+                        <form method="POST" action="{{ route('admin.orders.cash-payment', $order->order_code) }}"
+                            class="admin-weight-form">
                             @csrf
 
                             <label>Total Harga</label>
@@ -373,7 +395,7 @@
                         </div>
                     </div>
 
-                    <div class="admin-status-list">
+                    <div class="admin-status-list admin-history-clean">
                         @forelse ($order->statusLogs->sortByDesc('created_at') as $log)
                             <div class="admin-status-item">
                                 <i class="bi bi-clock-history"></i>

@@ -1263,3 +1263,38 @@
         width: 100%;
     }
 }
+
+.admin-wa-link {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.55rem;
+    padding: 0.48rem 0.72rem;
+    border-radius: 999px;
+    color: #15803d;
+    background: #dcfce7;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.admin-wa-link:hover {
+    color: #166534;
+    background: #bbf7d0;
+    text-decoration: none;
+}
+
+.admin-history-clean .admin-status-item {
+    border-bottom: 0 !important;
+    text-decoration: none !important;
+}
+
+.admin-history-clean .admin-status-item * {
+    text-decoration: none !important;
+}
+
+.admin-history-clean .admin-status-item strong,
+.admin-history-clean .admin-status-item span {
+    text-decoration: none !important;
+}
