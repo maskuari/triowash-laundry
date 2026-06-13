@@ -39,6 +39,9 @@ Route::middleware('admin.auth')->prefix('admin')->group(function () {
     // Admin Dashboard
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
 
+    Route::post('/pesanan/manual', [AdminController::class, 'storeManualOrder'])
+    ->name('admin.orders.manual-store');
+
     Route::patch('/pesanan/terima-semua', [AdminController::class, 'approveAllIncomingOrders'])
         ->name('admin.orders.approve-all');
 

@@ -8,12 +8,15 @@ use App\Models\PickupOption;
 use App\Models\Service;
 use App\Models\StatusLog;
 use App\Models\StoreStatus;
+use App\Models\Customer;
+use App\Models\OrderItem;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+
 
 class AdminController extends Controller
 {
@@ -203,6 +206,138 @@ class AdminController extends Controller
             ->route('admin.dashboard')
             ->with('success', 'Pesanan berhasil di-ACC dan pindah ke bagian ACC/Dijemput.');
     }
+    public function storeManualOrder(Request $request): RedirectResponse
+{
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:100'],
+        'phone' => ['required', 'string', 'min:10', 'max:20'],
+        'address' => ['required', 'string', 'max:1000'],
+
+        'service_id' => [
+            'required',
+            Rule::exists('services', 'id')->where('category', Service::CATEGORY_PAKET),
+        ],
+        'service_type_id' => [
+            'required',
+            Rule::exists('services', 'id')->where('category', Service::CATEGORY_LAYANAN),
+        ],
+        'fragrance_id' => [
+            'nullable',
+            Rule::exists('services', 'id')->where('category', Service::CATEGORY_WANGI),
+        ],
+        'pickup_option_id' => [
+            'required',
+            Rule::exists('pickup_options', 'id')->where(function ($query) {
+                $query
+                    ->where('is_active', true)
+                    ->where('code', '!=', 'antar_ambil_sendiri')
+                    ->where('name', 'not like', '%Ambil Sendiri%');
+            }),
+        ],
+        'notes' => ['nullable', 'string', 'max:1000'],
+    ], [
+        'name.required' => 'Nama pelanggan wajib diisi.',
+        'phone.required' => 'Nomor HP pelanggan wajib diisi.',
+        'phone.min' => 'Nomor HP minimal 10 digit.',
+        'address.required' => 'Alamat pelanggan wajib diisi.',
+        'service_id.required' => 'Paket wajib dipilih.',
+        'service_type_id.required' => 'Layanan wajib dipilih.',
+        'pickup_option_id.required' => 'Opsi antar jemput wajib dipilih.',
+    ]);
+
+    $package = Service::query()
+        ->where('id', $validated['service_id'])
+        ->where('category', Service::CATEGORY_PAKET)
+        ->firstOrFail();
+
+    $serviceType = Service::query()
+        ->where('id', $validated['service_type_id'])
+        ->where('category', Service::CATEGORY_LAYANAN)
+        ->firstOrFail();
+
+    $fragrance = null;
+
+    if (!empty($validated['fragrance_id'])) {
+        $fragrance = Service::query()
+            ->where('id', $validated['fragrance_id'])
+            ->where('category', Service::CATEGORY_WANGI)
+            ->firstOrFail();
+    }
+
+    $pickupOption = PickupOption::query()
+        ->where('id', $validated['pickup_option_id'])
+        ->where('is_active', true)
+        ->firstOrFail();
+
+    $order = DB::transaction(function () use ($validated, $package, $serviceType, $fragrance, $pickupOption) {
+        $customer = Customer::updateOrCreate(
+            ['phone' => $validated['phone']],
+            [
+                'name' => $validated['name'],
+                'address' => $validated['address'],
+            ]
+        );
+
+        $legacyPickupType = in_array($pickupOption->code, Order::legacyPickupTypes(), true)
+            ? $pickupOption->code
+            : 'dijemput_antar';
+
+        $order = Order::create([
+            'customer_id' => $customer->id,
+            'order_code' => Order::generateOrderCode(),
+            'pickup_type' => $legacyPickupType,
+            'pickup_option_id' => $pickupOption->id,
+            'pickup_option_name' => $pickupOption->name,
+            'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
+            'payment_status' => Order::PAYMENT_UNPAID,
+            'weight' => null,
+            'total_price' => 0,
+            'notes' => $validated['notes'] ?? 'Pesanan dibuat manual oleh admin.',
+        ]);
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'service_id' => $package->id,
+            'qty' => 1,
+            'subtotal' => 0,
+        ]);
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'service_id' => $serviceType->id,
+            'qty' => 1,
+            'subtotal' => 0,
+        ]);
+
+        if ($fragrance) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'service_id' => $fragrance->id,
+                'qty' => 1,
+                'subtotal' => 0,
+            ]);
+        }
+
+        $statusLog = [
+            'order_id' => $order->id,
+            'old_status' => null,
+            'new_status' => Order::STATUS_MENUNGGU_VERIFIKASI,
+            'updated_by' => 'admin',
+        ];
+
+        if (Schema::hasColumn('status_logs', 'description')) {
+            $statusLog['description'] = 'Pesanan dibuat manual oleh admin dan menunggu verifikasi.';
+        }
+
+        StatusLog::create($statusLog);
+
+        return $order;
+    });
+
+    return redirect()
+        ->route('admin.dashboard')
+        ->with('success', "Pesanan manual {$order->order_code} berhasil dibuat.");
+}
 
     public function rejectOrder(Order $order): RedirectResponse
     {

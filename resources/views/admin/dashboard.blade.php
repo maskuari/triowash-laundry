@@ -20,6 +20,10 @@
                     <i class="bi bi-grid-1x2-fill"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="#input-pesanan" class="admin-menu-link">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Input Pesanan</span>
+                </a>
 
                 <a href="#masuk" class="admin-menu-link">
                     <i class="bi bi-inbox-fill"></i>
@@ -150,6 +154,135 @@
             </section>
 
             <section class="admin-content-list">
+                {{-- Input Pesanan Manual --}}
+<div id="input-pesanan" class="admin-panel admin-panel-full">
+    <div class="admin-panel-header">
+        <div>
+            <span>Manual Order</span>
+            <h2>Input Pesanan Pelanggan</h2>
+        </div>
+    </div>
+
+        <form method="POST" action="{{ route('admin.orders.manual-store') }}" class="admin-manual-order-form">
+            @csrf
+
+        <div>
+            <label>Nama Pelanggan</label>
+            <input
+                type="text"
+                name="name"
+                placeholder="Contoh: Budi Santoso"
+                value="{{ old('name') }}"
+            >
+        </div>
+
+        <div>
+            <label>Nomor HP</label>
+            <input
+                type="text"
+                name="phone"
+                placeholder="Contoh: 081234567890"
+                value="{{ old('phone') }}"
+            >
+        </div>
+
+        <div class="admin-form-full">
+            <label>Alamat Lengkap</label>
+            <textarea
+                name="address"
+                rows="3"
+                placeholder="Contoh: Jl. Pangeran No. 10, RT 05, Banjarmasin"
+            >{{ old('address') }}</textarea>
+        </div>
+
+        <div>
+            <label>Paket</label>
+            <div class="admin-select-field">
+                <i class="bi bi-basket2"></i>
+                <select name="service_id">
+                    <option value="">Pilih Paket</option>
+                    @foreach ($packages as $package)
+                        <option value="{{ $package->id }}" @selected(old('service_id') == $package->id)>
+                            {{ $package->service_name }} - Rp{{ number_format($package->price_per_kg, 0, ',', '.') }}/kg
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label>Layanan</label>
+            <div class="admin-select-field">
+                <i class="bi bi-lightning-charge"></i>
+                <select name="service_type_id">
+                    <option value="">Pilih Layanan</option>
+                    @foreach ($serviceTypes as $serviceType)
+                        <option value="{{ $serviceType->id }}" @selected(old('service_type_id') == $serviceType->id)>
+                            {{ $serviceType->service_name }} - Rp{{ number_format($serviceType->price_per_kg, 0, ',', '.') }}/kg
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label>Pilihan Wangi</label>
+            <div class="admin-select-field">
+                <i class="bi bi-stars"></i>
+                <select name="fragrance_id">
+                    <option value="">Tanpa Wangi</option>
+                    @foreach ($fragrances as $fragrance)
+                        <option value="{{ $fragrance->id }}" @selected(old('fragrance_id') == $fragrance->id)>
+                            {{ $fragrance->service_name }}
+                            @if ($fragrance->price_per_kg > 0)
+                                - Rp{{ number_format($fragrance->price_per_kg, 0, ',', '.') }}/kg
+                            @else
+                                - Gratis
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label>Opsi Antar-Jemput</label>
+            <div class="admin-select-field">
+                <i class="bi bi-truck"></i>
+                <select name="pickup_option_id">
+                    <option value="">Pilih Opsi</option>
+                    @foreach ($pickupOptions->where('is_active', true) as $pickupOption)
+                        @continue($pickupOption->code === 'antar_ambil_sendiri' || str_contains(strtolower($pickupOption->name), 'ambil sendiri'))
+                        <option value="{{ $pickupOption->id }}" @selected(old('pickup_option_id') == $pickupOption->id)>
+                            {{ $pickupOption->name }}
+                            @if (($pickupOption->price ?? 0) > 0)
+                                - Rp{{ number_format($pickupOption->price, 0, ',', '.') }}
+                            @else
+                                - Gratis
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div class="admin-form-full">
+            <label>Catatan Tambahan <span>opsional</span></label>
+            <textarea
+                name="notes"
+                rows="3"
+                placeholder="Contoh: Tolong pisahkan baju putih dan berwarna."
+            >{{ old('notes') }}</textarea>
+        </div>
+
+        <div class="admin-form-full">
+            <button type="submit" class="admin-btn-primary">
+                <i class="bi bi-plus-circle"></i>
+                Simpan Pesanan Pelanggan
+            </button>
+        </div>
+    </form>
+</div>
                 {{-- Pesanan Masuk --}}
                 <div id="masuk" class="admin-panel admin-panel-full">
                     <div class="admin-panel-header admin-panel-header-search">
