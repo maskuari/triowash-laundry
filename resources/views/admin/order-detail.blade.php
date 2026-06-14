@@ -130,7 +130,7 @@
                             <strong>{{ $order->customer->phone }}</strong>
 
                             @if ($waUrl)
-                                <a href="{{ $waUrl }}" target="_blank" class="admin-wa-link">
+                                <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer" class="admin-wa-link">
                                     <i class="bi bi-whatsapp"></i>
                                     Hubungi WhatsApp
                                 </a>
