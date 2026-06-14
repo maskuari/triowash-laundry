@@ -336,48 +336,6 @@
     font-size: 1.2rem;
 }
 
-.admin-sidebar-card {
-    margin-top: auto;
-    padding: 1.25rem;
-    border-radius: 24px;
-    color: var(--white);
-    background:
-        radial-gradient(circle at top right, rgba(255, 255, 255, 0.24), transparent 30%),
-        var(--gradient);
-    box-shadow: var(--shadow-primary);
-}
-
-.admin-sidebar-card i {
-    width: 46px;
-    height: 46px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.8rem;
-    border-radius: 16px;
-    color: var(--primary);
-    background: rgba(255, 255, 255, 0.9);
-}
-
-.admin-sidebar-card h6 {
-    margin-bottom: 0.35rem;
-    font-weight: 900;
-}
-
-.admin-sidebar-card p {
-    margin-bottom: 0.9rem;
-    color: rgba(255, 255, 255, 0.82);
-    font-size: 0.85rem;
-    line-height: 1.5;
-    font-weight: 600;
-}
-
-.admin-sidebar-card a {
-    color: var(--white);
-    font-weight: 900;
-    text-decoration: none;
-}
-
 /* Main */
 .admin-main {
     width: 100%;
@@ -413,6 +371,33 @@
     margin: 0;
     color: var(--muted);
     font-weight: 600;
+}
+
+.admin-ai-floating {
+    position: fixed;
+    right: 1.35rem;
+    bottom: 1.35rem;
+    z-index: 2200;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    border-radius: 999px;
+    color: #ffffff;
+    background: var(--gradient);
+    box-shadow: 0 16px 34px rgba(37, 99, 235, 0.28);
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.admin-ai-floating:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.admin-ai-floating i {
+    font-size: 1.1rem;
 }
 
 /* Summary */
@@ -1294,10 +1279,6 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .admin-sidebar-card {
-        display: none;
-    }
-
     .admin-main {
         margin-left: 0;
         padding: 1.25rem;
@@ -1476,5 +1457,13 @@
 
     .admin-table {
         min-width: 680px;
+    }
+
+    .admin-ai-floating {
+        right: 0.85rem;
+        bottom: 0.85rem;
+        min-height: 44px;
+        padding: 0 0.85rem;
+        font-size: 0.88rem;
     }
 }

@@ -68,12 +68,6 @@
                 </button>
             </form>
 
-            <div class="admin-sidebar-card">
-                <i class="bi bi-robot"></i>
-                <h6>AI CS Aktif</h6>
-                <p>Customer service otomatis siap membantu pelanggan.</p>
-                <a href="/cs-ai">Lihat AI</a>
-            </div>
         </aside>
 
         <main class="admin-main">
@@ -1029,6 +1023,11 @@
                 </div>
             </section>
         </main>
+
+        <a href="/cs-ai" class="admin-ai-floating" aria-label="Buka AI Customer Service">
+            <i class="bi bi-robot"></i>
+            <span>AI CS</span>
+        </a>
     </section>
 
     {{-- Modal Edit Service --}}
