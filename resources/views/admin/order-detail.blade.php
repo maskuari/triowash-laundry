@@ -2,10 +2,6 @@
 
 @section('title', 'Detail Pesanan')
 
-@section('styles')
-    <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
-@endsection
-
 @php
     $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
     $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;

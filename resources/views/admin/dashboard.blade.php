@@ -2,10 +2,6 @@
 
 @section('title', 'Dashboard Admin')
 
-@section('styles')
-    <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
-@endsection
-
 @section('content')
     <section class="admin-page">
         <aside class="admin-sidebar">
