@@ -8,8 +8,35 @@
 
 @php
     $currentStatus = $order?->status;
-    $statusOrder = collect($trackingSteps)->pluck('status')->toArray();
-    $currentIndex = $currentStatus ? array_search($currentStatus, $statusOrder, true) : false;
+    $isOfflineOrder = $order
+        && (
+            ($order->pickup_option_name ?? null) === 'Pesanan Offline'
+            || ($order->pickup_option_id === null && $order->pickup_type === 'antar_ambil_sendiri')
+        );
+
+    $visibleTrackingSteps = $trackingSteps;
+    $trackingStatus = $currentStatus;
+
+    if ($isOfflineOrder) {
+        $visibleTrackingSteps = collect($trackingSteps)
+            ->whereIn('status', [
+                \App\Models\Order::STATUS_DIPROSES,
+                \App\Models\Order::STATUS_SELESAI,
+            ])
+            ->values()
+            ->all();
+
+        $trackingStatus = in_array($currentStatus, [
+            \App\Models\Order::STATUS_SELESAI,
+            \App\Models\Order::STATUS_DIANTAR,
+            \App\Models\Order::STATUS_SELESAI_DITERIMA,
+        ], true)
+            ? \App\Models\Order::STATUS_SELESAI
+            : \App\Models\Order::STATUS_DIPROSES;
+    }
+
+    $statusOrder = collect($visibleTrackingSteps)->pluck('status')->toArray();
+    $currentIndex = $trackingStatus ? array_search($trackingStatus, $statusOrder, true) : false;
 
     $mainService = $order?->orderItems?->firstWhere('service.category', 'paket')?->service;
     $fragrance = $order?->orderItems?->firstWhere('service.category', 'wangi')?->service;
@@ -159,10 +186,10 @@
                             </div>
 
                             <div class="tracking-timeline">
-                                @foreach ($trackingSteps as $index => $step)
+                                @foreach ($visibleTrackingSteps as $index => $step)
                                     @php
                                         $isDone = $currentIndex !== false && $index < $currentIndex;
-                                        $isCurrent = $currentStatus === $step['status'];
+                                        $isCurrent = $trackingStatus === $step['status'];
 
                                         $stepClass = '';
                                         if ($isDone) {

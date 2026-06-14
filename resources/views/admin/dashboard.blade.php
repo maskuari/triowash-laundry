@@ -241,27 +241,6 @@
             </div>
         </div>
 
-        <div>
-            <label>Opsi Antar-Jemput</label>
-            <div class="admin-select-field">
-                <i class="bi bi-truck"></i>
-                <select name="pickup_option_id">
-                    <option value="">Pilih Opsi</option>
-                    @foreach ($pickupOptions->where('is_active', true) as $pickupOption)
-                        @continue($pickupOption->code === 'antar_ambil_sendiri' || str_contains(strtolower($pickupOption->name), 'ambil sendiri'))
-                        <option value="{{ $pickupOption->id }}" @selected(old('pickup_option_id') == $pickupOption->id)>
-                            {{ $pickupOption->name }}
-                            @if (($pickupOption->price ?? 0) > 0)
-                                - Rp{{ number_format($pickupOption->price, 0, ',', '.') }}
-                            @else
-                                - Gratis
-                            @endif
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-
         <div class="admin-form-full">
             <label>Catatan Tambahan <span>opsional</span></label>
             <textarea
@@ -351,6 +330,8 @@
                                             $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
                                             $serviceType = $order->orderItems->firstWhere('service.category', 'layanan')?->service;
                                             $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
+                                            $isOfflineOrder = ($order->pickup_option_name ?? null) === 'Pesanan Offline'
+                                                || ($order->pickup_option_id === null && $order->pickup_type === 'antar_ambil_sendiri');
                                         @endphp
 
                                         <tr>
@@ -378,11 +359,15 @@
                                             </td>
 
                                             <td>
-                                                {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
-                                                @if (($order->pickupOption?->price ?? 0) > 0)
-                                                    <small class="d-block text-muted">
-                                                        Rp{{ number_format($order->pickupOption->price, 0, ',', '.') }}
-                                                    </small>
+                                                @if ($isOfflineOrder)
+                                                    <span class="admin-badge warning">Pesanan Offline</span>
+                                                @else
+                                                    {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
+                                                    @if (($order->pickupOption?->price ?? 0) > 0)
+                                                        <small class="d-block text-muted">
+                                                            Rp{{ number_format($order->pickupOption->price, 0, ',', '.') }}
+                                                        </small>
+                                                    @endif
                                                 @endif
                                             </td>
 
@@ -487,6 +472,8 @@
                                             $mainService = $order->orderItems->firstWhere('service.category', 'paket')?->service;
                                             $serviceType = $order->orderItems->firstWhere('service.category', 'layanan')?->service;
                                             $fragrance = $order->orderItems->firstWhere('service.category', 'wangi')?->service;
+                                            $isOfflineOrder = ($order->pickup_option_name ?? null) === 'Pesanan Offline'
+                                                || ($order->pickup_option_id === null && $order->pickup_type === 'antar_ambil_sendiri');
                                         @endphp
 
                                         <tr>
@@ -514,11 +501,15 @@
                                             </td>
 
                                             <td>
-                                                {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
-                                                @if (($order->pickupOption?->price ?? 0) > 0)
-                                                    <small class="d-block text-muted">
-                                                        Rp{{ number_format($order->pickupOption->price, 0, ',', '.') }}
-                                                    </small>
+                                                @if ($isOfflineOrder)
+                                                    <span class="admin-badge warning">Pesanan Offline</span>
+                                                @else
+                                                    {{ $order->pickup_option_name ?? $order->pickupOption?->name ?? '-' }}
+                                                    @if (($order->pickupOption?->price ?? 0) > 0)
+                                                        <small class="d-block text-muted">
+                                                            Rp{{ number_format($order->pickupOption->price, 0, ',', '.') }}
+                                                        </small>
+                                                    @endif
                                                 @endif
                                             </td>
 

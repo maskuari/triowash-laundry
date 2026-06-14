@@ -225,15 +225,6 @@ class AdminController extends Controller
             'nullable',
             Rule::exists('services', 'id')->where('category', Service::CATEGORY_WANGI),
         ],
-        'pickup_option_id' => [
-            'required',
-            Rule::exists('pickup_options', 'id')->where(function ($query) {
-                $query
-                    ->where('is_active', true)
-                    ->where('code', '!=', 'antar_ambil_sendiri')
-                    ->where('name', 'not like', '%Ambil Sendiri%');
-            }),
-        ],
         'notes' => ['nullable', 'string', 'max:1000'],
     ], [
         'name.required' => 'Nama pelanggan wajib diisi.',
@@ -242,7 +233,6 @@ class AdminController extends Controller
         'address.required' => 'Alamat pelanggan wajib diisi.',
         'service_id.required' => 'Paket wajib dipilih.',
         'service_type_id.required' => 'Layanan wajib dipilih.',
-        'pickup_option_id.required' => 'Opsi antar jemput wajib dipilih.',
     ]);
 
     $package = Service::query()
@@ -264,12 +254,7 @@ class AdminController extends Controller
             ->firstOrFail();
     }
 
-    $pickupOption = PickupOption::query()
-        ->where('id', $validated['pickup_option_id'])
-        ->where('is_active', true)
-        ->firstOrFail();
-
-    $order = DB::transaction(function () use ($validated, $package, $serviceType, $fragrance, $pickupOption) {
+    $order = DB::transaction(function () use ($validated, $package, $serviceType, $fragrance) {
         $customer = Customer::updateOrCreate(
             ['phone' => $validated['phone']],
             [
@@ -278,16 +263,12 @@ class AdminController extends Controller
             ]
         );
 
-        $legacyPickupType = in_array($pickupOption->code, Order::legacyPickupTypes(), true)
-            ? $pickupOption->code
-            : 'dijemput_antar';
-
         $order = Order::create([
             'customer_id' => $customer->id,
             'order_code' => Order::generateOrderCode(),
-            'pickup_type' => $legacyPickupType,
-            'pickup_option_id' => $pickupOption->id,
-            'pickup_option_name' => $pickupOption->name,
+            'pickup_type' => 'antar_ambil_sendiri',
+            'pickup_option_id' => null,
+            'pickup_option_name' => 'Pesanan Offline',
             'status' => Order::STATUS_MENUNGGU_VERIFIKASI,
             'payment_status' => Order::PAYMENT_UNPAID,
             'weight' => null,
